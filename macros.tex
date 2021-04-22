@@ -1,0 +1,86 @@
+\newcommand{\R}{\mathbb{R}}   
+\newcommand{\Z}{\mathbb{Z}}   
+\newcommand{\N}{\mathbb{N}}   
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\K}{\mathbb{K}}
+\newcommand{\powerset}[1]{\mathcal{P} ( #1 )}   
+\newcommand{\termdef}[1]{\textnormal{\textbf{#1}}}
+\newcommand{\nullvector}{\textit{o}}
+
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}%
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}%
+
+\makeatletter
+\newcommand*{\Relbarfill@}{\arrowfill@\Relbar\Relbar\Relbar}
+\newcommand*{\xeq}[2][]{\ext@arrow 0055\Relbarfill@{#1}{#2}}
+\makeatother
+
+\newsavebox{\overlongequation}
+\newenvironment{longeq}
+ {\begin{displaymath}\begin{lrbox}{\overlongequation}$\displaystyle}
+ {$\end{lrbox}\makebox[0pt]{\usebox{\overlongequation}}\end{displaymath}}
+
+% Swap the definition of \abs* and \norm*, so that \abs
+% and \norm resizes the size of the brackets, and the 
+% starred version does not.
+\makeatletter
+\let\oldabs\abs
+\def\abs{\@ifstar{\oldabs}{\oldabs*}}
+%
+\let\oldnorm\norm
+\def\norm{\@ifstar{\oldnorm}{\oldnorm*}}
+\makeatother
+
+\makeatletter
+\renewcommand*\env@matrix[1][*\c@MaxMatrixCols c]{%
+  \hskip -\arraycolsep
+  \let\@ifnextchar\new@ifnextchar
+  \array{#1}}
+\makeatother
+
+%\newtheorem{theorem}{Theorem}[]
+%\newtheorem{lemma}{Lemma}[]
+%\newtheorem{cor}{Corollary}[]
+%\newtheorem{claim}{Claim}[]
+%\newtheorem*{definition}{Definition}
+%\newtheorem*{remark}{Remark}
+%\newtheorem{example}{Example}
+
+% Draw black "slugs" whenever a line overflows, so that we can spot it easily.
+\overfullrule=1mm
+
+%%% Macros for definitions, theorems, claims, examples, ... (requires amsthm package)
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{claim}{Claim}
+
+\theoremstyle{plain}
+\newtheorem*{definition}{Definition}
+
+%\theoremstyle{remark}
+\newtheorem{cor}{Corollary}
+\newtheorem*{remark}{Remark}
+\theoremstyle{remark}
+\newtheorem*{example}{Example}
+
+\newcommand{\bigO}{\mathcal{O}}
+
+% These macros employ a little dirty trick to convince LaTeX to typeset
+% chapter headings sanely, without lots of empty space above them.
+% Feel free to ignore.
+\makeatletter
+\def\@makechapterhead#1{
+  {\parindent \z@ \raggedright \normalfont
+   \Huge\bfseries \thechapter. #1
+   \par\nobreak
+   \vskip 20\p@
+}}
+\def\@makeschapterhead#1{
+  {\parindent \z@ \raggedright \normalfont
+   \Huge\bfseries #1
+   \par\nobreak
+   \vskip 20\p@
+}}
+\makeatother
