@@ -1,4 +1,33 @@
 \chapter*{Introduction}
 \addcontentsline{toc}{chapter}{Introduction}
 
-Hello
+At its early stages, the internet was envisioned to be the pinnacle of joint human effort to gather and easily retrieve expert knowledge on virtually any topic.
+However, in the current state of affairs, with a large number of laypeople connected to the internet, extensive and aggressive advertising, and adversarial agents such as foreign powers or simply malicious individuals, the information on the internet is becoming harder to be trusted. 
+To combat this, multiple projects focused on fact-checking emerged. 
+Various platforms such as Instagram and Twitter incorporated some form of fact-checking, mainly on viral or politicians' posts.
+The current coronavirus pandemic has highlighted the need for such systems since there is a need for accurate and up-to-date information. 
+
+In Czechia and the Slovak Republic, there exists a popular project Demagog\footnote{\url{https://demagog.cz}} whose goal is verification of politicians' claims.
+The claim verification is carried out manually using primary sources. 
+Similiar foreign projects are PolitiFact\footnote{\url{https://www.politifact.com/}}, Factcheck.org\footnote{\url{https://www.factcheck.org/}}, and Washington Post Fact Checker\footnote{\url{https://www.washingtonpost.com/news/fact-checker/}}.
+
+The recent advances in natural language understanding, mainly due to the BERT model \citep{bert} introduced in 2015, led to new research on using neural methods in fact-checking.
+The FEVER paper \citep{fever} led this effort since 2018, focusing on creating a dataset meant for training neural models.
+They succeeded in creating a sizeable human-annotated dataset and were able to train a model on it.
+Their approach was a pipeline that first retrieved relevant documents (the document retrieval task) and then labeled the initial claim based on these documents. 
+Since then, the FEVER team held multiple shared tasks, and the pipeline approach proved to be adequate.
+
+This thesis is one of the multiple theses written by the fact-checking team at ČVUT as a result of our effort to create a Czech fact-checking dataset from the ground up, inspired by FEVER and \citet{danish_fever}, and usable Czech models for the fact-checking task.
+This dataset is based on Czech news articles provided by Czech News Agency.
+We refer to the completed dataset as the ČTK dataset. 
+The team is under the supervision of Ing. Jan Drchal, Ph.D., and financed by the GAČR grant.
+\citet{ullrich} describes the process of creating the ČTK dataset, which consisted of building a Czech annotation platform, working with annotators, and analyzing and cleaning up the gathered data.
+The annotators are students of the Faculty of Social Sciences at Charles University, one of our partners.
+
+This thesis focuses on the document retrieval part of this complex task.
+Specifically, it deals with finding suitable models for processing long Czech documents (news articles) since most BERT-based NLP models work with 512 token input size, which might not be adequate.
+
+In Chapter \ref{chap:defs}, I formally define the problem of document retrieval, introduce methods that are already being used, and methods that we will be exploring further in this thesis. 
+% In the next chapter (Chapter \ref{chap:data}), I describe in-depth the FEVER, its Czech-translated version, and the ČTK dataset.
+The FEVER dataset, its Czech-translated version, and the ČTK dataset are described in-depth in the next chapter (Chapter \ref{chap:data}).
+% The before-mentioned datasets are in-depth described in the next chapter (Chapter \ref{chap:data}).

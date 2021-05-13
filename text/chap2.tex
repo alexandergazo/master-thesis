@@ -1,0 +1,38 @@
+\chapter{Datasets}
+\label{chap:data}
+
+% TODO was it really mentioned
+As mentioned, the primary dataset, usage-wise and inspiration-wise, was the FEVER dataset \citep{fever}.
+Deriving \cite{fever} methods, we \citep{ullrich} were able to create our own FEVER-like database using Czech News Agency's infobank, to which we had the access granted thanks to the GAČR grant.  
+
+\section{FEVER}
+
+Fact Extraction and Verification \citep{fever} dataset is a large-scale dataset based on Wikipedia articles.
+The dataset was created by extracting sentences from English Wikipedia articles and classifying them by human annotators as Supported, Refuted, or NotEnoughInfo.
+The evidence, either single or multiple articles or even paragraphs proving or disproving the claim, is also recorded.
+The complete FEVER contains 185,445 annotated claims generated using 50,000 popular articles.
+
+The creation consisted of two steps. The sentences were manually extracted from popular Wikipedia articles.
+Then, to create a more diverse set of claims, the annotators had the option of producing new claims by mutating the existing ones in various ways (generalizing, specification, entity substitution, non-trivial negating, and rephrasing).
+More complex claims were created by providing hyperlinked Wikipedia articles as another source of information while mutating the claim.
+In the second step - annotation - the annotators were asked to label the generated claims and provide suggested evidence when needed.
+The whole process was streamlined in order not to spend longer than five minutes on a single claim throughout all stages.
+
+The quality of the dataset was throughoutly tested in the paper.
+One of the methods was the fact that each generated claim was annotated multiple times to prevent mislabeling.
+
+\section{ČTK}
+% nomenclature
+
+Thanks to the GAČR grant, we were granted access to the Czech News Agency's infobank. 
+Inspired by \cite{fever} and \cite{danish_fever}, our colleague \cite{ullrich} created a czech version of the claim extracting and labeling software tool running over the ČTK infobank's articles. 
+It was prepared to be used by layman annotators, who were students of our grant partner - the Faculty of Social Sciences at Charles University.
+%In the cooperation with Faculty of Social Sciences, we were able to create 
+%Annotators were provided in cooperation with the Faculty of Social Sciences.
+
+%TODO GACR grant a sucasti
+
+The dataset creation consisted of two harvests. 
+After reviewing the results of the first one, we were able to rewrite instructions in the tool to guide the annotators to create higher-quality mutations and labels with fewer conflicts.
+The second harvest concluded with $\circ$ 3,500 labeled claims, with more than half of them being labeled two or more times. %TODO cite webpage
+As of writing, this figure is not final as the dataset needs to be manually cleaned and have conflicts resolved. 

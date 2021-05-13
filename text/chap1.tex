@@ -2,3 +2,72 @@
 \label{chap:defs}
 
 \section{Document Retrieval}
+
+The term document retrieval refers to the task of finding relevant information to user queries in a large set of records (documents). 
+Therefore, the document retrieval system operates over a database of records, which for this thesis are described in \ref{chap:data}.
+
+The task could be formulated \citep{two-tower} using a scoring function $f \colon \mathcal{D} \times \mathcal{Q} \rightarrow \R$ that maps a document-query pair $(d, q)$ to a score $f(d,q)$. 
+The ranking function can be naturally also used for reranking a set of candidate documents supplied by another, possibly a faster method (typically TF-IDF).
+This definition also describes a range of other tasks such as open-domain question answering \citep{wiki-retrieval} or recommendation systems.
+
+In order to solve the document retrieval task, we will focus on finding an appropriate function $f$.
+In this thesis, we will explore different approaches to designing the scoring function $f$, specifically such function, which is not limited by the length of the documents.
+
+% TODO sectioning omg
+\section{Approaches to Document Retrieval}
+
+This section introduces the most common methods of document retrieval, as well as new models with great potential.
+
+\subsection{Non-Neural Approaches}
+
+\subsubsection{BM25}
+
+BM25 \citep{bm25} is a well-established ranking function based on term frequencies and inverse document frequencies (TF-IDF).
+The commonly used formula is
+$$
+\text{BM25}(Q,D)=\sum^n_{i=1}\text{IDF}(q_i)\frac{f(q_i, D)(k_1+1)}{f(q_i,D)+k_1\left(1-b+b\frac{\abs{D}}{\text{avdgl}}\right)}
+\ ,$$
+
+which differs from the original formula in several parameters (initially, four) due to setting these parameters to neutral values.
+
+In the formula, $Q$ is a query consisting of words $q_1,\ldots,q_n$, $f(q_i,D)$ is a frequency of keyword $q_i$ in the document $D$, $|D|$ is a length of the document $D$. 
+
+%TODO problem with long documents - BM25+ http://sifaka.cs.uiuc.edu/~ylv2/pub/cikm11-lowerbound.pdf
+
+
+\subsection{Neural Approaches}
+
+\subsubsection{BERT}
+In 2018, BERT \citep{bert} the now well-established NLP model was introduced. The model is pre-trained using the masked language modeling task and the next sentence prediction task.
+The defining feature of BERT is its self-attention mechanism, which attends to the whole input at once and transforms input tokens based on full context, both left, and right to the token.
+Since the "each versus each" approach is employed, this mechanism naturally introduces $O(N^2)$ time complexity, which acts as a bottleneck in applications, where a longer input is required.
+Since its introduction, there have been many well-performing models based on BERT (this movement is sometimes referred to as "BERTology").
+In this thesis, we will focus on models which use similar architecture and modify attention mechanism in order to be able to compute long inputs.
+% used usually for GLUE benchmark which is not???? for document retrieval
+% TODO maybe include attention formula
+
+\subsubsection{Longformer}
+
+Longformer model \citep{longformer} arises when instead of computing the whole $QK^T$, only certain regions (usually specific diagonals) are calculated, thus reducing the model time complexity allowing for longer inputs.
+Huggingface models are available.
+
+\subsubsection{Reformer}
+
+Reformer model \citep{reformer} offers two improvements to the transformer model.
+The first is the usage of locality-sensitive hashing in the attention mechanism, which in order to approximate the full attention matrix focuses for each input token only on the closest tokens.
+The closest tokens are found using the locality-sensitive hashing function.
+This, coupled with memory saving features, offers a model which can have a whole novel as its single input.
+
+\subsubsection{Performer}
+
+Performer model \citep{performer} looks at the self-attention mechanism as a kernel function and introduces randomized feature functions such that the expected value of scalar product %????%e
+of the resulting feature vectors is equal to the true value.
+% TODO weak ensurences
+
+\subsubsection{Nyostromformer}
+
+Nyostromformer \citep{nystrom} uses "smart" Moore-Penrose inverse approximation. Instead of full $Q$ and $K$ matrices, only segment-means are used, and then the Moore-Penrose inverse is calculated using an iterative algorithm.
+
+\subsubsection{ColBERT}
+
+
