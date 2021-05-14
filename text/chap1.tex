@@ -1,33 +1,38 @@
-\chapter{Definitions}
-\label{chap:defs}
-
-\section{Document Retrieval}
+\chapter{Document Retrieval}
+\label{chap:docret}
 
 The term document retrieval refers to the task of finding relevant information to user queries in a large set of records (documents). 
-Therefore, the document retrieval system operates over a database of records, which for this thesis are described in \ref{chap:data}.
+% Therefore, the document retrieval system operates over a database of records, which for this thesis are described in \ref{chap:data}.
+One can think of document retrieval as a search in a vast database of documents. 
+In this view, web search services, such as Google, are a form of document retrieval. The database of documents are all accessible web pages on the internet, and the user query functions as the search query.
 
-The task could be formulated \citep{two-tower} using a scoring function $f \colon \mathcal{D} \times \mathcal{Q} \rightarrow \R$ that maps a document-query pair $(d, q)$ to a score $f(d,q)$. 
-The ranking function can be naturally also used for reranking a set of candidate documents supplied by another, possibly a faster method (typically TF-IDF).
-This definition also describes a range of other tasks such as open-domain question answering \citep{wiki-retrieval} or recommendation systems.
+\section{Formal Description}
+The task can be formally described \citep{two-tower} using a scoring function (sometimes referred to as ranking function) %article before ranking maybe
+$$f\colon\mathcal{D}\times\mathcal{Q}\rightarrow\R$$
+that maps a document-query pair $(d, q)$ to a score $f(d,q)$. 
+Then, typically, the documents in pairs with the highest scores are considered to be the proposed solution to the task. 
 
-In order to solve the document retrieval task, we will focus on finding an appropriate function $f$.
-In this thesis, we will explore different approaches to designing the scoring function $f$, specifically such function, which is not limited by the length of the documents.
+This definition also fits a description of a range of other tasks such as open-domain question answering \citep{wiki-retrieval} or recommendation systems.
 
-% TODO sectioning omg
 \section{Approaches to Document Retrieval}
+% TODO two tower paper, 
+In order to solve the document retrieval task, we will focus on finding an appropriate function $f$, which in this thesis means suitable for long documents.
 
-This section introduces the most common methods of document retrieval, as well as new models with great potential.
+This thesis explores both neural and non-neural approaches to designing the scoring function, with emphasis on the neural approach while using the other as the baseline.
+
+% This section introduces the most common methods of document retrieval, as well as new models with great potential.
 
 \subsection{Non-Neural Approaches}
 
 \subsubsection{BM25}
+
+TODO
 
 BM25 \citep{bm25} is a well-established ranking function based on term frequencies and inverse document frequencies (TF-IDF).
 The commonly used formula is
 $$
 \text{BM25}(Q,D)=\sum^n_{i=1}\text{IDF}(q_i)\frac{f(q_i, D)(k_1+1)}{f(q_i,D)+k_1\left(1-b+b\frac{\abs{D}}{\text{avdgl}}\right)}
 \ ,$$
-
 which differs from the original formula in several parameters (initially, four) due to setting these parameters to neutral values.
 
 In the formula, $Q$ is a query consisting of words $q_1,\ldots,q_n$, $f(q_i,D)$ is a frequency of keyword $q_i$ in the document $D$, $|D|$ is a length of the document $D$. 
@@ -37,6 +42,20 @@ In the formula, $Q$ is a query consisting of words $q_1,\ldots,q_n$, $f(q_i,D)$ 
 
 \subsection{Neural Approaches}
 
+When dealing with natural language processing, we can approach the task in two different ways, both described in detail by \cite{two-tower}. 
+
+The first is to have the document-query pair $(d,q)$ on the input of the neural model (cross-attention model).
+One of the benefits is the direct usage of the neural model on the downstream tasks, possibly granting better performance.
+
+The second approach is to preprocess the whole database of documents by the model and then using some metric for choosing the documents related to the query based on the computed representation.
+The obvious advantage is the offline preprocessing and thus improved performance during inference.
+Only the unseen query has to be processed by the neural model followed by computing the metric between the documents' representation and the query representation.
+This is usually way faster than using a neural model for every document and can also be significantly spedup \citep{faiss}.
+The obvious disadvantage is the need for additional space to store the precomputed representation.
+
+We will be using the second approach as our computational resources are limited.
+
+% TODO under this line ---------------------------------
 \subsubsection{BERT}
 In 2018, BERT \citep{bert} the now well-established NLP model was introduced. The model is pre-trained using the masked language modeling task and the next sentence prediction task.
 The defining feature of BERT is its self-attention mechanism, which attends to the whole input at once and transforms input tokens based on full context, both left, and right to the token.
