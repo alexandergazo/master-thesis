@@ -6,6 +6,8 @@ The term document retrieval refers to the task of finding relevant information t
 One can think of document retrieval as a search in a vast database of documents. 
 In this view, web search services, such as Google, are a form of document retrieval. The database of documents are all accessible web pages on the internet, and the user query functions as the search query.
 
+For our uses, the query is the claim to be fact-checked, and the document database is a collection of relevant documents, which we call knowledge scope. 
+
 \section{Formal Description}
 The task can be formally described \citep{two-tower} using a scoring function (sometimes referred to as ranking function) %article before ranking maybe
 $$f\colon\mathcal{D}\times\mathcal{Q}\rightarrow\R$$
@@ -16,19 +18,70 @@ This definition also fits a description of a range of other tasks such as open-d
 
 \section{Approaches to Document Retrieval}
 % TODO two tower paper, 
-In order to solve the document retrieval task, we will focus on finding an appropriate function $f$, which in this thesis means suitable for long documents.
+In order to solve the document retrieval task, we will focus on finding an appropriate function $f$.
+In this thesis, that means a function suitable for long documents.
 
-This thesis explores both neural and non-neural approaches to designing the scoring function, with emphasis on the neural approach while using the other as the baseline.
+This thesis explores both neural and non-neural (traditional) approaches to designing the scoring function, with emphasis on the neural approach while using the other as the baseline.
 
 % This section introduces the most common methods of document retrieval, as well as new models with great potential.
 
-\subsection{Non-Neural Approaches}
+\subsection{Traditional Approaches}
 
-\subsubsection{BM25}
+\subsubsection{TFIDF}
 
-TODO
+The traditional approaches are motivated by the intuition that relevant documents will contain the same words as those present in the query. 
+Longer documents are at an advantage since there is a higher chance of the relevant words being present, so the term count is often normalized by the number of all terms in the document.
+This simple metric is called term frequency (TF). 
 
-BM25 \citep{bm25} is a well-established ranking function based on term frequencies and inverse document frequencies (TF-IDF).
+TF can be ineffective if some of the terms in the query are very common in the document database.
+This issue is resolved by introducing inverse document frequency, which informs how common the term is across all the documents.
+The base version of IDF:
+$$\text{idf}(t, D)=\log{\frac{\abs{D}}{\abs{\{d\in D: t\in d\}}}}\ .$$
+
+% If we combine these two metrics
+Multiplying these two metrics, we get the TFIDF weight of term $t$ in document $d$ in document database $D$:
+%which is calculated simply as
+$$\text{tfidf}(t,d,D)=\text{tf}(t,d)\cdot\text{idf}(t,D)\ .$$
+
+We have explained how to compute each term's weight ("importance") in each document.
+The intuitive formula for query score $f(q, d)$ is then
+$$
+f_D(q, d)\sim\sum_{t \in q}\text{tfidf}(t, d, D)\ .
+$$
+% TFIDF is called weighting scheme exactly for this reason. % toto urcite inam
+
+This formula can be improved -- in this form, it favors longer queries $q$.
+We can also precompute the TFIDF values for each document and vocabulary word in the corpus.
+Thus we obtain $|D|\times {vocabulary\_size}$ matrix $V$ of TFIDF values.
+To get the relevance of each document to the query $q$, that is $f_D(q, d)$, we first represent the query $q$ as a bag of words vector, corresponding to the columns of our precomputed TFIDF matrix $V$, ignoring words that appear in the query only. %only in the query?
+The resulting score is then the normalized (not to favor long queries or documents) dot product of a row of the matrix and the BOW representation of the query $q$, denoted $\vec{q}$.
+We can obtain the scores for every query document pair by matrix multiplication:
+$$
+f_D(q, d) = \frac{V\vec{q}}{|\vec{q}|} \in \R^{|D|}\ ,
+$$
+provided that matrix $V$ is row-normalized (euclidian norm of each row is equal to one).
+Please note that this is equivalent to computing the cosine similarity for each document and query vector pair.
+
+This function is one of the first and still widely used \citep{Beel2016} metrics for document retrieval. 
+
+Some of the apparent disadvantages of TFIDF are the lack of semantic meaning that comes from the independence on the word order and matching exact words only. % independence???
+The former may be improved by using n-grams and the latter using character level features, which is especially helpful in inflected languages such as Czech.
+On the other hand, TFIDF is, to this day, a very well-performing low-computation cost ranking function.
+
+Over the years, multiple versions of the TFIDF approach appeared, differing slightly in formulas or weights of the factors. One of such versions is Best Match 25.
+% maybe put the last sentence as the last sentence of the whole section
+
+\subsubsection{Best Match 25 (BM25)}
+
+One of the best performing versions \citep{bm_vs_tfidf} is Best Match 25 (BM25) by \cite{bm25}.
+The original formula is:
+$$
+\text{BM25}(q, d) = 
+        \log \text{idf}(t, d)
+        \cdot \frac{(k_1 + tf_{t, d})}{k_1((1-b) + b \cdot (L_d / L_{avg})) + tf_{t, d}} 
+        \cdot \frac{(k_3 + 1)tf_{t, q}}{k_3 + tf_{t, q}}.
+$$
+
 The commonly used formula is
 $$
 \text{BM25}(Q,D)=\sum^n_{i=1}\text{IDF}(q_i)\frac{f(q_i, D)(k_1+1)}{f(q_i,D)+k_1\left(1-b+b\frac{\abs{D}}{\text{avdgl}}\right)}
@@ -39,6 +92,8 @@ In the formula, $Q$ is a query consisting of words $q_1,\ldots,q_n$, $f(q_i,D)$ 
 
 %TODO problem with long documents - BM25+ http://sifaka.cs.uiuc.edu/~ylv2/pub/cikm11-lowerbound.pdf
 
+This approach does not account for word variations and the real meaning.
+However, it, to this day, represents a solid baseline as reported by \cite{weak_baselines}.
 
 \subsection{Neural Approaches}
 
