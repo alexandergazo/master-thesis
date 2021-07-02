@@ -4,28 +4,42 @@
 The term document retrieval refers to the task of finding relevant information to user queries in a large set of records (documents). 
 % Therefore, the document retrieval system operates over a database of records, which for this thesis are described in \ref{chap:data}.
 One can think of document retrieval as a search in a vast database of documents. 
-In this view, web search services, such as Google, are a form of document retrieval. The database of documents are all accessible web pages on the internet, and the user query functions as the search query.
+In this view, web search services, such as Google, are also a form of document retrieval. 
+In this case, the database of documents is all the accessible web pages on the internet.
 
 For our uses, the query is the claim to be fact-checked, and the document database is a collection of relevant documents, which we call knowledge scope. 
 
 \section{Formal Description}
+\label{sec:formal_descr_dr}
 The task can be formally described \citep{two-tower} using a scoring function (sometimes referred to as ranking function) %article before ranking maybe
-$$f\colon\mathcal{D}\times\mathcal{Q}\rightarrow\R$$
+$$f_\mathcal{D}\colon\mathcal{D}\times\mathcal{Q}\rightarrow\R$$
 that maps a document-query pair $(d, q)$ to a score $f(d,q)$. 
 Then, typically, the documents in pairs with the highest scores are considered to be the proposed solution to the task. 
 
-This definition also fits a description of a range of other tasks such as open-domain question answering \citep{wiki-retrieval} or recommendation systems.
+As mentioned above, this definition also fits a description of a range of other tasks such as open-domain question answering \citep{wiki-retrieval} or recommendation systems.
 
 \section{Approaches to Document Retrieval}
 % TODO two tower paper, 
 In order to solve the document retrieval task, we will focus on finding an appropriate function $f$.
 In this thesis, that means a function suitable for long documents.
 
-This thesis explores both neural and non-neural (traditional) approaches to designing the scoring function, with emphasis on the neural approach while using the other as the baseline.
+We explore both neural and non-neural (traditional) approaches to designing the scoring function, emphasizing the neural approach while using the other as the baseline. 
+While both work on entirely different principles, we will use both to generate an indexed version of the knowledge scope.
+Traditional approaches will result in sparse representation with the feature dimension size equal typically to the corpus's vocabulary size (the vocabulary can also contain n-grams or character n-grams if it is advantageous).
+Therefore, it can be considered a weighting scheme, assigning "importance" to each word if it was present in the document. 
+Neural approaches produce a dense representation, as described by \citet{two-tower}.
+It is usually a fixed-size vector of real numbers, inherently hard to interpret.
+The meaning can only be derived from the relative position of different documents' indexes (vectors).
+
+Neural models can also be used directly as the scoring function as in Section \ref{sec:formal_descr_dr}.
+This can, according to \citet{two-tower}, lead to better performance. However, since the query is provided at runtime, the evaluation cannot be precomputed and has to run for every document each time we enter a new query.
+This is currently infeasible for usage on whole corpora but can be utilized by running on a smaller subset of the corpus (so-called reranking), typically pre-selected by a non-neural model, creating a hybrid approach.
 
 % This section introduces the most common methods of document retrieval, as well as new models with great potential.
 
 \subsection{Traditional Approaches}
+
+Traditional approaches covered are weighting schemes. 
 
 \subsubsection{TFIDF}
 
@@ -62,42 +76,43 @@ $$
 provided that matrix $V$ is row-normalized (euclidian norm of each row is equal to one).
 Please note that this is equivalent to computing the cosine similarity for each document and query vector pair.
 
-This function is one of the first and still widely used \citep{Beel2016} metrics for document retrieval. 
+This function is one of the first and still widely used \citep{Beel2016} weighting schemes for document retrieval. 
 
 Some of the apparent disadvantages of TFIDF are the lack of semantic meaning that comes from the independence on the word order and matching exact words only. % independence???
 The former may be improved by using n-grams and the latter using character level features, which is especially helpful in inflected languages such as Czech.
 On the other hand, TFIDF is, to this day, a very well-performing low-computation cost ranking function.
 
-Over the years, multiple versions of the TFIDF approach appeared, differing slightly in formulas or weights of the factors. One of such versions is Best Match 25.
+Over the years, multiple versions of the TFIDF approach appeared, differing slightly in formulas or weights of the factors. One of such versions is Best Match 25. %questionable TODO
 % maybe put the last sentence as the last sentence of the whole section
 
 \subsubsection{Best Match 25 (BM25)}
 
-One of the best performing versions \citep{bm_vs_tfidf} is Best Match 25 (BM25) by \cite{bm25}.
-The original formula is:
+%The following is 
+A more complex term weighting scheme is Best Match 25 \citep{bm25}:
+%One of the best performing versions \citep{bm_vs_tfidf} is Best Match 25 (BM25) by \cite{bm25}.
+%The original formula is:
 $$
 \text{BM25}(q, d) = 
-        \log \text{idf}(t, d)
-        \cdot \frac{(k_1 + tf_{t, d})}{k_1((1-b) + b \cdot (L_d / L_{avg})) + tf_{t, d}} 
-        \cdot \frac{(k_3 + 1)tf_{t, q}}{k_3 + tf_{t, q}}.
+        \sum_{t\in q}
+        \text{idf}(t, d)
+        \cdot \frac{(k_1 + \text{tf}(t, d))}{k_1((1-b) + b \cdot (L_d / L_{avg})) + \text{tf}(t, d)} 
+        \cdot \frac{(k_3 + 1)\text{tf}(t, q)}{k_3 + \text{tf}(t, q)}.
 $$
 
-The commonly used formula is
-$$
-\text{BM25}(Q,D)=\sum^n_{i=1}\text{IDF}(q_i)\frac{f(q_i, D)(k_1+1)}{f(q_i,D)+k_1\left(1-b+b\frac{\abs{D}}{\text{avdgl}}\right)}
-\ ,$$
-which differs from the original formula in several parameters (initially, four) due to setting these parameters to neutral values.
+The first term is IDF.
+The second term is TF with two tuning parameters $k_1$ and $b$. Parameter $k_1$ corresponds directly to TF scaling, while parameter $b$ corresponds to scaling by the inverse of the document's length.
+TThe third term follows the same idea as the second term, but B parameter equivalent is not needed since we only have one fixed query.
+It shows that this term is only useful for longer queries $q$, such as full paragraphs. 
 
-In the formula, $Q$ is a query consisting of words $q_1,\ldots,q_n$, $f(q_i,D)$ is a frequency of keyword $q_i$ in the document $D$, $|D|$ is a length of the document $D$. 
+Since this weighting scheme introduces tunable parameters, it can be trained on data. If the data is not available, \citet[Section 11.4.3]{schutze2008introduction} recommends using $k_1, k_3 \in [1.2;2]$ and $b=0.75$.
 
 %TODO problem with long documents - BM25+ http://sifaka.cs.uiuc.edu/~ylv2/pub/cikm11-lowerbound.pdf
 
-This approach does not account for word variations and the real meaning.
-However, it, to this day, represents a solid baseline as reported by \cite{weak_baselines}.
+As reported by TODO \cite{weak-baselines}, BM25 (if tuned well) is still a solid baseline capable of beating even much more complex neural models.
 
 \subsection{Neural Approaches}
 
-When dealing with natural language processing, we can approach the task in two different ways, both described in detail by \cite{two-tower}. 
+As mentioned above, when dealing with natural language processing, we can approach the task in two different ways, both described in detail by \cite{two-tower}. 
 
 The first is to have the document-query pair $(d,q)$ on the input of the neural model (cross-attention model).
 One of the benefits is the direct usage of the neural model on the downstream tasks, possibly granting better performance.
