@@ -1,0 +1,25 @@
+\chapter{Background}
+
+\section{Fact-Checking}
+
+The problem of fact-checking can be thought of as a classification problem.
+We classify claims into three categories: True, False, and Not Enough Info (NEI). 
+The claims are usually one or a few sentences long strings stating some fact or facts. 
+There are platforms, such as Demagog.cz, which also use a category labeled "misleading", reserved for facts that are technically the truth but usually imply additional, incorrect meaning.
+For now, our models do not use this category.
+
+For categories True and False, it is also needed to provide evidence validating or refuting the claim.
+This is usually either well-known fact, a specific news article, or multiple articles. 
+This creates a perceived weakness that some might criticize, that we still rely on some "outside truth", and cannot decide what is objectively true. 
+Since something can be true only in relation to some other facts (the real state of the world, available news sources, etc.) this criticism lacks substance, but still emphasizes the importance of correclty choosing the knowledge database. 
+In our project, the knowledge database is the \CTK{} infobank. 
+This naturally provides somewhat distorted image of reality, since some world knowledge is already assumed by journalists, and the original information may be compressed by the article form. 
+Approaches based on language comprehension therefore face a challenge of infering real world knowledge from somewhat distorted data. 
+
+\subsection{Pipeline}
+
+\section{Document Retrieval}
+\section{Sparse vs Dense Representation}
+\section{Student-Teacher Training}
+\section{Attention Mechanism}
+\section{Models' Pre-Training}
