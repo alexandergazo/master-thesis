@@ -1,48 +1,59 @@
 \chapter*{Introduction}
 \addcontentsline{toc}{chapter}{Introduction}
-
-TODO
-
-\begin{itemize}
-    \item dlhe vstupy namotivoavat
-    \item self atention - o(n2)
-    \item ...
-\end{itemize}
-
+\section*{Motivation}
 At its early stages, the internet was envisioned to be the pinnacle of joint human effort to gather and easily retrieve expert knowledge on virtually any topic.
 However, with many laypeople connected to the internet, extensive and aggressive advertising, and adversarial agents such as foreign powers or simply malicious individuals, the information on the internet is becoming harder to be trusted in the current state of affairs.
-To combat this, multiple projects focused on fact-checking emerged. 
-Various platforms such as Instagram and Twitter incorporated fact-checking mechanisms, mainly on viral or politicians' posts.
-The current coronavirus pandemic has highlighted the need for such systems since there is a need for accurate and up-to-date information. 
+The information overload created by these agents results in 'opaque' state of the internet, where relevant true information is hard to find in the mass of similary sounding, non-professional written sources.
+Manually fact-checking the claims therefore becomes very expensive and time consuming - bordering with unfeasible.
+Nevertheless, multiple projects focused on fact-checking emerged. 
+Various platforms such as Instagram and Twitter incorporated fact-checking mechanisms, mainly on viral or politicians' posts. 
 
 In Czechia and the Slovak Republic, a popular project is Demagog\footnote{\url{https://demagog.cz}}, whose goal is to verify politicians' claims.
 The claim verification is carried out manually using primary sources. 
 Similar foreign projects are PolitiFact\footnote{\url{https://www.politifact.com/}}, Factcheck.org\footnote{\url{https://www.factcheck.org/}}, and Washington Post Fact Checker\footnote{\url{https://www.washingtonpost.com/news/fact-checker/}}.
+Multiple past "public debates", such as the European migrant crisis or the current coronavirus pandemic, have highlighted the need for such systems since there is a need for accurate and up-to-date information.
 The process is very labor-intensive, and thus, there is a natural demand for automatization.
 
-The recent advances in natural language understanding, mainly the introduction of the BERT model \citep{bert} in 2015, led to new research on the use of neural methods in fact-checking.
+The recent advances in natural language understanding, mainly the introduction of transformer architecture \citep{transformers-vaswani} and the BERT model \citep{bert}, led to new research on the use of neural methods in fact-checking.
 The FEVER paper \citep{fever} has led this effort since 2018, focusing on creating a dataset meant for training neural models.
-They succeeded in creating a sizeable human-annotated dataset and were able to train a model on it.
-The model was a pipeline that first retrieved relevant documents (the document retrieval task) and then labeled the initial claim based on these documents. 
-Since then, the FEVER team held multiple shared tasks, and the pipeline approach proved to be adequate.
+They succeeded in creating a sizeable human-annotated dataset and were able to train a pipeline model on it.
+The model first retrieved relevant documents (the document retrieval task) and then labeled the initial claim based on these documents. 
+%Since then, the FEVER team held multiple shared tasks, and the pipeline approach proved to be adequate.
 With better models released every year, the long-term goal is to create a model capable of correctly assessing a claim's truthfulness and provide satisfactory evidence. However, creating helpful tools for journalists to assist them in the fact-checking scenario is the goal for now.
 
 On the other hand, the advances also provide new ways of creating false information on a large scale. Such an example is the recently introduced GPT-3 model \citep{gpt}, which is able to generate human-sounding english texts.
 The potential ability of adversaries to flood the internet with fake news articles emphasizes the need for scalable fact-checking tools.
 
+Automatic fact-checking should not be thought of as the miracle cure to the fake news problem, which is much more complex and deserves a sociaty-wide approach.
+
 \section*{Related Work}
-\section*{Thesis Outline}
+
+\section*{Transformer Models}
+
+The original transofrmer architecture \citep{transformers-vaswani} and BERT-model \citep{bert} are based, simply put, on feeding fully-connected feed-forward networks with token representations aggregated from the whole text, meaning that the information from the input tokens (words or subwords) is changed according to their whole context. 
+This mechanism, named attention by the authors \citep{transformers-vaswani}, 'attenting' to all the input tokens for every input tokens introduces quadratic time complexity. 
+The input of BERT is thus limited to 512 tokens as a design choice.
+Working with this restriction, we decided to split the \CTK{} articles to paragraphs and perform document retrieval on them, theoretically losing joint article meaning.
+
+In this thesis we explore this practice and compare it to BERT-based models with altered attention mechanism such as \nystr{} \citep{nystrom}, Longformer \citep{longformer} and Reformer \citep{reformer}, allowing for longer inputs without increasing the computation cost, compromising in other areas.
+
+\section*{AI in Journalism}
 
 This thesis is one of the multiple theses written by the fact-checking team at ČVUT, led by Ing. Jan Drchal, Ph.D., as part of the AI in Journalism project, supported by the Transformation of Journalisms Ethics in the Advent of Artificial Intelligence (TL02000288)\footnote{\url{https://starfos.tacr.cz/cs/project/TL02000288}} grant from the Technology Agency of the Czech Republic.
 Our team focuses on creating a Czech fact-checking dataset from the ground up and developing usable Czech models for the fact-checking task, inspired by FEVER and \citet{danish_fever}.
-The dataset is based on Czech news articles provided in cooperation with Czech News Agency.
-We refer to the completed dataset as the ČTK dataset. 
-Our colleague \citet{ullrich} describes the creation of the ČTK dataset, which consisted of building a Czech annotation platform, working with annotators, and analyzing and cleaning up the gathered data.
-The annotators are students of the Faculty of Social Sciences at Charles University, one of our partners.
+The dataset is based on Czech news articles provided in cooperation with the Czech News Agency\footnote{Česká Tlačová Agentúra (ČTK)} -- we refer to the completed dataset as the ČTK dataset. 
+Our colleague \citet{ullrich} describes the creation of the ČTK dataset, which consisted of building a Czech annotation platform, working with annotators (students of the Faculty of Social Sciences at Charles University, one of our partners), and analyzing and cleaning up the gathered data.
+The works from colleagues \citet{dedkova} and \citet{rypar} deal with various aspects of document retrieval -- the use of hybrid (multi-stage) models and the performance of different embedding paradigms, respectively.
 
-This thesis focuses on the document retrieval part of this complex task.
+\section*{Thesis Outline}
+
+This thesis focuses on the document retrieval part of the fact-checking pipeline.
 Specifically, it deals with models suitable for processing long Czech documents (news articles) since most BERT-based NLP models work with input size limited to 512 tokens, which might not be adequate.
-We also focus on BERT-based NLP models, but with changes to the attention mechanism allowing for longer inputs.
+We focus precisely on these, but with changes to the attention mechanism allowing for longer inputs.
+
+The first chapter deals with fact-checking and 
+In the first chapter, we define all the necesery background knowledge, 
+
 In Chapter \ref{chap:docret}, we formally define document retrieval, introduce methods that are already in use, and methods that we will be exploring further in this thesis. 
 % In the next chapter (Chapter \ref{chap:data}), I describe in-depth the FEVER, its Czech-translated version, and the ČTK dataset.
 The FEVER dataset, its Czech-translated version, and the ČTK dataset are described in-depth in the next chapter (Chapter \ref{chap:data}).
