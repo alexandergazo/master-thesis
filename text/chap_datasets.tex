@@ -8,28 +8,28 @@ Deriving from \cite{fever} methods, we \citep{ullrich} were able to create our o
 \section{FEVER Dataset}
 
 \textbf{F}act \textbf{E}xtraction and \textbf{Ver}ification \citep{fever} dataset is a large-scale dataset based on Wikipedia articles.
-The dataset was created by extracting sentences (claims) from the english Wikipedia articles and classifying them by human annotators as Supported, Refuted, or NotEnoughInfo.
-If the claim is verifiable (Supported, Refuted), then the evidence, either single or multiple paragraphs, or even articles proving or disproving the claim, is also recorded.
+The dataset was created by extracting sentences (claims) from the English Wikipedia articles and classifying them by human annotators as Supported, Refuted, or NotEnoughInfo.
+If the claim is verifiable (Supported, Refuted), then the evidence, either single or multiple paragraphs or even articles proving or disproving the claim, is also recorded.
 The complete FEVER contains 185,445 annotated claims generated using 50,000 popular articles.
 
 The creation consisted of two steps. The sentences were first manually extracted from popular Wikipedia articles.
 Only the first paragraphs, usually containing the summary, were used for this step. 
 Then, to create a more diverse set of claims, the annotators had the option of producing new claims by mutating the existing ones in various ways (generalizing, specification, entity substitution, non-trivial negating, and rephrasing).
-The negation used has to be non-trivial, because simple negative words and phrases like "no" and "it is not true, that" can be levereged by the later steps of the fact-checking pipeline to immeadetely classify claims as Refuted instead of trying to really understand the text.
+The negation used has to be non-trivial because simple negative words and phrases like "no" and "it is not true that" can be leveraged by the later steps of the fact-checking pipeline to immediately classify claims as Refuted instead of trying to understand the text.
 
 More complex claims were created by providing related Wikipedia articles (articles hyperlinked from the original article) as another source of information while mutating the claim.
 
 In the second step - annotation - the annotators were asked to label the generated claims and provide suggested evidence when needed.
-The whole process was streamlined in order not to spend longer than five minutes on a single claim throughout all stages.
+The whole process was streamlined to not spend longer than five minutes on a single claim throughout all stages.
 
 The quality of the dataset was throughoutly tested in the paper.
 One of the methods for improving the dataset was annotating the generated claim by multiple people to reduce mislabeling.
 
 \subsection{FEVER CS}
 
-For use in baseline training and pre-training we localized the original FEVER dataset into Czech language. 
-The localization consisted of translating the original claims using a translation service, and mapping the english Wikipedia knowledge base used by FEVER to available czech Wikipedia articles, while removing claims with missing Czech evidence.
-The process is in depth described by \citet[Chapter 3]{ullrich}.
+For use in baseline training and pre-training, we localized the original FEVER dataset into the Czech language. 
+The localization consisted of translating the original claims using a translation service and mapping the English Wikipedia knowledge base used by FEVER to available Czech Wikipedia articles while removing claims with missing Czech evidence.
+The process is in-depth described by \citet[Chapter 3]{ullrich}.
 
 \begin{table}[h!]
     \centering
@@ -44,7 +44,7 @@ The process is in depth described by \citet[Chapter 3]{ullrich}.
 \caption{Label distribution of the resulting FEVER CS}
 \end{table}
 
-Because of the large-scale usage of machine translation without the means for robust evaluation, and the lack of one-to-one correspondence between Czech and English Wikipedia articles, this dataset serves only as a baseline to verify robustness of our models on a larger scale, primarly for the document retrieval part of the pipeline.
+Because of the large-scale usage of machine translation without the means for robust evaluation and the lack of one-to-one correspondence between Czech and English Wikipedia articles, this dataset serves only as a baseline to verify the robustness of our models on a larger scale, primarily for the document retrieval part of the pipeline.
 
 \begin{figure}[h!]
     \begin{framed}
@@ -72,13 +72,10 @@ Because of the large-scale usage of machine translation without the means for ro
     \label{fig:fevercs_example}
 \end{figure}
 
-%{"id": 153304, "verifiable": "VERIFIABLE", "label": "REFUTES", "claim": "Ilkhanate byl založen jako pohár.", "evidence": [[[177249, 190108, "Ílchanát", 0, "Ilkhanate"]]], "claim_en": "Ilkhanate was established as a cup."}
-%{"id": 120449, "verifiable": "VERIFIABLE", "label": "SUPPORTS", "claim": "Venuše se nazývá „sesterskou planetou“ Země.", "evidence": [[[141476, 156671, "Venuše (planeta)", 8, "Venus"]]], "claim_en": "Venus is called the \"sister planet\" of Earth."}
-
 \section{\CTK}
 % nomenclature
 
-The basis for this dataset is the collection of Czech news articles provided in colaboration with Czech News Agency\footnote{Česká Tlačová Agentúra (ČTK)}. 
+The basis for this dataset is the collection of Czech news articles provided in collaboration with the Czech News Agency. 
 Inspired by \cite{fever} and \cite{danish_fever}, our colleague \cite{ullrich} created a Czech version of the claim extracting and labeling software tool\footnote{available at \url{https://fcheck.fel.cvut.cz/}} running over the ČTK infobank's articles. 
 %TODO insert image
 It was designed to be used by layman annotators, who were students of our partner - the Faculty of Social Sciences at Charles University.
@@ -132,7 +129,7 @@ The claim mutation in FEVER and \CTK{} datasets can be a source of unintentional
 For example, \citet{fever} pointed out that their annotators had difficulties negating the claims beyond trivial negations.
 
 \citet{rypar} conducted a series of evaluations on the \CTK{} and FEVER CS datasets using dataset-weighted cue information (DCI), and cue productivity and coverage \citep{niven-probing}, inpsired by \citet{derczynski-etal-2020-maintaining}. 
-The results concluded that the original FEVER dataset contained simple negative clues which were also present in FEVER CS, although with limited impact only. No significant bias was confirmed, but the current size of the \CTK{} dataset allows for thematic clusters which impact the dataset more than they should. 
+The results concluded that the original FEVER dataset contained simple negative clues, which were also present in FEVER CS, although with limited impact only. No significant bias was confirmed, but the current size of the \CTK{} dataset allows for thematic clusters which impact the dataset more than they should. 
 
 \subsection{Data Leakage}
 
