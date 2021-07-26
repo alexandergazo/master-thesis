@@ -7,7 +7,7 @@ One can think of document retrieval as a search in a vast database of documents.
 In this view, web search services, such as Google, are also a form of document retrieval. 
 In this case, the database of documents is all the accessible web pages on the internet.
 
-For our uses, the query is the claim to be fact-checked, and the document database is a collection of relevant documents, which we call knowledge scope. 
+For our uses, the query is the claim to be fact-checked, and the document database is a collection of relevant documents, which we call knowledge base. 
 
 \section{Formal Description}
 \label{sec:formal_descr_dr}
@@ -16,32 +16,42 @@ $$f_\mathcal{D}\colon\mathcal{D}\times\mathcal{Q}\rightarrow\R$$
 that maps a document-query pair $(d, q)$ to a score $f(d,q)$. 
 Then, typically, the documents in pairs with the highest scores are considered to be the proposed solution to the task. 
 
-As mentioned above, this definition also fits a description of a range of other tasks such as open-domain question answering \citep{wiki-retrieval} or recommendation systems.
+As mentioned above, this definition also fits descriptions of a range of other tasks such as open-domain question answering \citep{wiki-retrieval} or recommendation systems.
 
 \section{Approaches to Document Retrieval}
-% TODO two tower paper, 
-In order to solve the document retrieval task, we will focus on finding an appropriate function $f$.
-In this thesis, that means a function suitable for long documents.
 
-We explore both neural and non-neural (traditional) approaches to designing the scoring function, emphasizing the neural approach while using the other as the baseline. 
+The organizators of \textbf{T}ext \textbf{Re}trieval \textbf{C}onference (TREC) \citep{trec-2020} classify retrieval methods into three categories (with examples):
+\begin{itemize}
+        \item Traditional -- TFIDF, BM25
+        \item Neural Networks using Language Modeling (NNLM) -- BERT-based
+        \item Neural Networks -- others
+\end{itemize}
+We explore NNLM and traditional approaches, emphasizing the NNLM approach while using the other as the baseline. ``Neural Networks'' is reserved for methods that use neural networks only in some parts of its implementation (such as word embeddings) and do not rely explicitly on language modeling. We do not explore such methods in this thesis, and therefore, by neural approach, we refer to NNLM methods
 While both work on entirely different principles, we will use both to generate an indexed version of the knowledge scope.
+
+\COMMENT{%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Traditional approaches will result in sparse representation with the feature dimension size equal typically to the corpus's vocabulary size (the vocabulary can also contain n-grams or character n-grams if it is advantageous).
 Therefore, it can be considered a weighting scheme, assigning "importance" to each word if it was present in the document. 
-Neural approaches produce a dense representation, as described by \citet{two-tower}.
+Neural approaches used in this paper produce a dense representation, as described by \citet{two-tower}.
 It is usually a fixed-size vector of real numbers, inherently hard to interpret.
-The meaning can only be derived from the relative position of different documents' indexes (vectors).
+The meaning can be derived only from the relative position of different documents' indexes (vectors).
 
 Neural models can also be used directly as the scoring function as in Section \ref{sec:formal_descr_dr}.
 This can, according to \citet{two-tower}, lead to better performance. However, since the query is provided at runtime, the evaluation cannot be precomputed and has to run for every document each time we enter a new query.
 This is currently infeasible for usage on whole corpora but can be utilized by running on a smaller subset of the corpus (so-called reranking), typically pre-selected by a non-neural model, creating a hybrid approach.
 
+% TODO two-tower paper, 
+In order to solve the document retrieval task, we will focus on finding an appropriate function $f$.
+In this thesis, that means a function suitable for long documents.
+}
+
 % This section introduces the most common methods of document retrieval, as well as new models with great potential.
 
-\subsection{Traditional Approaches}
+\section{Traditional Approaches}
 
-Traditional approaches covered are weighting schemes. 
+Traditional approaches covered are weighting schemes, assigning a query-dependent score to each word in each document in the database.
 
-\subsubsection{TFIDF}
+\subsection{TFIDF}
 
 The traditional approaches are motivated by the intuition that relevant documents will contain the same words as those present in the query. 
 Longer documents are at an advantage since there is a higher chance of the relevant words being present, so the term count is often normalized by the number of all terms in the document.
@@ -85,7 +95,7 @@ On the other hand, TFIDF is, to this day, a very well-performing low-computation
 Over the years, multiple versions of the TFIDF approach appeared, differing slightly in formulas or weights of the factors. One of such versions is Best Match 25. %questionable TODO
 % maybe put the last sentence as the last sentence of the whole section
 
-\subsubsection{Best Match 25 (BM25)}
+\subsection{Best Match 25 (BM25)}
 
 %The following is 
 A more complex term weighting scheme is Best Match 25 \citep{bm25}:
@@ -110,7 +120,7 @@ Since this weighting scheme introduces tunable parameters, it can be trained on 
 
 As reported by TODO \cite{weak-baselines}, BM25 (if tuned well) is still a solid baseline capable of beating even much more complex neural models.
 
-\subsection{Neural Approaches}
+\section{Neural Approaches}
 
 As mentioned above, when dealing with natural language processing, we can approach the task in two different ways, both described in detail by \cite{two-tower}. 
 
@@ -126,7 +136,7 @@ The obvious disadvantage is the need for additional space to store the precomput
 We will be using the second approach as our computational resources are limited.
 
 % TODO under this line ---------------------------------
-\subsubsection{BERT}
+\subsection{BERT}
 In 2018, BERT \citep{bert} the now well-established NLP model was introduced. The model is pre-trained using the masked language modeling task and the next sentence prediction task.
 The defining feature of BERT is its self-attention mechanism, which attends to the whole input at once and transforms input tokens based on full context, both left, and right to the token.
 Since the "each versus each" approach is employed, this mechanism naturally introduces $O(N^2)$ time complexity, which acts as a bottleneck in applications, where a longer input is required.
@@ -135,29 +145,31 @@ In this thesis, we will focus on models which use similar architecture and modif
 % used usually for GLUE benchmark which is not???? for document retrieval
 % TODO maybe include attention formula
 
-\subsubsection{Longformer}
+\subsection{Longformer}
 
 Longformer model \citep{longformer} arises when instead of computing the whole $QK^T$, only certain regions (usually specific diagonals) are calculated, thus reducing the model time complexity allowing for longer inputs.
 Huggingface models are available.
 
-\subsubsection{Reformer}
+\subsection{Reformer}
 
 Reformer model \citep{reformer} offers two improvements to the transformer model.
 The first is the usage of locality-sensitive hashing in the attention mechanism, which in order to approximate the full attention matrix focuses for each input token only on the closest tokens.
 The closest tokens are found using the locality-sensitive hashing function.
 This, coupled with memory saving features, offers a model which can have a whole novel as its single input.
 
-\subsubsection{Performer}
+\subsection{Performer}
 
 Performer model \citep{performer} looks at the self-attention mechanism as a kernel function and introduces randomized feature functions such that the expected value of scalar product %????%e
 of the resulting feature vectors is equal to the true value.
 % TODO weak ensurences
 
-\subsubsection{\nystr}
+\subsection{\nystr{}}
 
 \nystr{} \citep{nystrom} uses "smart" Moore-Penrose inverse approximation. Instead of full $Q$ and $K$ matrices, only segment-means are used, and then the Moore-Penrose inverse is calculated using an iterative algorithm.
 
-\subsubsection{ColBERT}
+\subsection{ColBERT}
+
+\citep{colbert}
 TODO Martinove výsledky cite
 
 
