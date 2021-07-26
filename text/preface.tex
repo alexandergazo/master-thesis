@@ -15,7 +15,7 @@ Multiple past "public debates", such as the European migrant crisis or the curre
 The process is very labor-intensive, and thus, there is a natural demand for automatization.
 
 The recent advances in natural language understanding, mainly the introduction of transformer architecture \citep{transformers-vaswani} and the BERT model \citep{bert}, led to new research on the use of neural methods in fact-checking.
-The FEVER paper \citep{fever} has led this effort since 2018, focusing on creating a dataset meant for training neural models.
+The FEVER\footnote{\url{https://fever.ai/}} paper \citep{fever} has led this effort since 2018, focusing on creating a dataset meant for training neural models.
 They succeeded in creating a sizeable human-annotated dataset and were able to train a pipeline model on it.
 The model first retrieved relevant documents (the document retrieval task) and then labeled the initial claim based on these documents. 
 %Since then, the FEVER team held multiple shared tasks, and the pipeline approach proved to be adequate.
@@ -40,7 +40,7 @@ In this thesis, we explore this practice and compare it to BERT-based models wit
 \section*{AI in Journalism}
 
 This thesis is one of the multiple theses written by the fact-checking team at ČVUT, led by Ing. Jan Drchal, Ph.D., as part of the AI in Journalism project, supported by the Transformation of Journalisms Ethics in the Advent of Artificial Intelligence (TL02000288)\footnote{\url{https://starfos.tacr.cz/cs/project/TL02000288}} grant from the Technology Agency of the Czech Republic.
-Our team focuses on creating a Czech fact-checking dataset from the ground up and developing usable Czech models for the fact-checking task, inspired by FEVER and \citet{danish_fever}.
+Our team focuses on creating a Czech fact-checking dataset from the ground up and developing usable Czech models for the fact-checking task, inspired by FEVER \citep{fever} and \citet{danish_fever}.
 The dataset is based on Czech news articles provided in cooperation with the Czech News Agency\footnote{Česká Tlačová Agentúra (ČTK)} -- we refer to the completed dataset as the ČTK dataset. 
 Our colleague \citet{ullrich} describes the creation of the ČTK dataset, which consisted of building a Czech annotation platform, working with annotators (students of the Faculty of Social Sciences at Charles University, one of our partners), and analyzing and cleaning up the gathered data.
 The works from colleagues \citet{dedkova} and \citet{rypar} deal with various aspects of document retrieval -- the use of hybrid (multi-stage) models and the performance of different embedding paradigms, respectively.
