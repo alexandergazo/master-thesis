@@ -67,18 +67,37 @@ Multiplying these two metrics, we get the TFIDF weight of term $t$ in document $
 %which is calculated simply as
 $$\text{tfidf}(t,d,D)=\text{tf}(t,d)\cdot\text{idf}(t,D)\ .$$
 
-We have explained how to compute each term's weight ("importance") in each document.
+\begin{figure}[!htb]
+	\centering
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{tfdif_map.png}
+	\end{minipage}%
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{tfidf.png}
+	\end{minipage}
+        \caption{Visualization of TFIDF depending on the term frequency and the frequency of the documents containing the term.}
+\end{figure}
+
+We have explained how to compute a term's weight (``importance'') for a specific document.
 The intuitive formula for query score $f(q, d)$ is then
 $$
-f_D(q, d)\sim\sum_{t \in q}\text{tfidf}(t, d, D)\ .
+f_D(q, d)\approx\sum_{t \in q}\text{tfidf}(t, d, D)\ .
 $$
-% TFIDF is called weighting scheme exactly for this reason. % toto urcite inam
+TFIDF is called a weighting scheme precisely for this reason.
 
-This formula can be improved -- in this form, it favors longer queries $q$.
-We can also precompute the TFIDF values for each document and vocabulary word in the corpus.
-Thus we obtain $|D|\times {vocabulary\_size}$ matrix $V$ of TFIDF values.
-To get the relevance of each document to the query $q$, that is $f_D(q, d)$, we first represent the query $q$ as a bag of words vector, corresponding to the columns of our precomputed TFIDF matrix $V$, ignoring words that appear in the query only. %only in the query?
-The resulting score is then the normalized (not to favor long queries or documents) dot product of a row of the matrix and the BOW representation of the query $q$, denoted $\vec{q}$.
+Since % term frequency and therefore tfidf is zero when 
+$$t\notin d \hspace{1mm}\Rightarrow\hspace{1mm} \text{tf}(t, d) = 0 \hspace{1mm}\Rightarrow\hspace{1mm} \text{tfidf}(t, d, D) = 0\ ,$$
+we know that only words in the corpus' vocabulary are important, and thus we can precompute the TFIDF values for each document, and word from the corpus' vocabulary.
+We obtain $|D|\times {vocabulary\_size}$ matrix $V$ of TFIDF values.
+%This formula can be improved -- in this form, it favors longer queries $q$. % DOES IT? TODO
+%We can also precompute the TFIDF values for each document and vocabulary word in the corpus.
+%Thus we obtain $|D|\times {vocabulary\_size}$ matrix $V$ of TFIDF values.
+Here, to simplify length normalization, we normalize the matrix V so that each row has unit norm.
+This step removes the need of normalization in the TFIDF formula and we may use raw term count instead of the normalized frequency.
+To get the relevance of each document to the query $q$, that is $f_D(q, d)$, we first represent the query $q$ as a bag of words vector (BOW), corresponding to the columns of our precomputed TFIDF matrix $V$, ignoring words that appear only in the query.
+The resulting score is then the normalized (not to favor long queries) dot product of a row of the matrix and the BOW representation of the query $q$ denoted $\vec{q}$.
 We can obtain the scores for every query document pair by matrix multiplication:
 $$
 f_D(q, d) = \frac{V\vec{q}}{|\vec{q}|} \in \R^{|D|}\ ,
@@ -87,10 +106,6 @@ provided that matrix $V$ is row-normalized (euclidian norm of each row is equal 
 Please note that this is equivalent to computing the cosine similarity for each document and query vector pair.
 
 This function is one of the first and still widely used \citep{Beel2016} weighting schemes for document retrieval. 
-
-Some of the apparent disadvantages of TFIDF are the lack of semantic meaning that comes from the independence on the word order and matching exact words only. % independence???
-The former may be improved by using n-grams and the latter using character level features, which is especially helpful in inflected languages such as Czech.
-On the other hand, TFIDF is, to this day, a very well-performing low-computation cost ranking function.
 
 Over the years, multiple versions of the TFIDF approach appeared, differing slightly in formulas or weights of the factors. One of such versions is Best Match 25. %questionable TODO
 % maybe put the last sentence as the last sentence of the whole section
@@ -105,20 +120,29 @@ $$
 \text{BM25}(q, d) = 
         \sum_{t\in q}
         \text{idf}(t, d)
-        \cdot \frac{(k_1 + \text{tf}(t, d))}{k_1((1-b) + b \cdot (L_d / L_{avg})) + \text{tf}(t, d)} 
-        \cdot \frac{(k_3 + 1)\text{tf}(t, q)}{k_3 + \text{tf}(t, q)}.
+        \cdot \frac{(k_1 + 1)\cdot\text{count}(t, d)}{k_1(1-b + b \cdot (L_d / L_{avg})) + \text{count}(t, d)} 
+        \cdot \frac{(k_3 + 1)\cdot\text{count}(t, q)}{k_3 + \text{count}(t, q)}.
 $$
 
 The first term is IDF.
 The second term is TF with two tuning parameters $k_1$ and $b$. Parameter $k_1$ corresponds directly to TF scaling, while parameter $b$ corresponds to scaling by the inverse of the document's length.
-TThe third term follows the same idea as the second term, but B parameter equivalent is not needed since we only have one fixed query.
-It shows that this term is only useful for longer queries $q$, such as full paragraphs. 
+The third term follows the same idea as the second term, but the $b$ parameter equivalent is unnecessary since we only have one fixed query.
+It shows \citep{schutze2008introduction} that this term is only valid for longer queries $q$, such as whole paragraphs. 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=.9\textwidth]{bm25.png}
+    \caption{TF term's relation to the length of the current document for $k=1.2$ and $b=0.75$.}
+\end{figure}
 
-Since this weighting scheme introduces tunable parameters, it can be trained on data. If the data is not available, \citet[Section 11.4.3]{schutze2008introduction} recommends using $k_1, k_3 \in [1.2;2]$ and $b=0.75$.
+Since this weighting scheme introduces tunable parameters, it can be trained on data. If the data is not available, \citet[Section 11.4.3]{schutze2008introduction} recommend using $k_1, k_3 \in [1.2;2]$ and $b=0.75$.
 
 %TODO problem with long documents - BM25+ http://sifaka.cs.uiuc.edu/~ylv2/pub/cikm11-lowerbound.pdf
 
-As reported by TODO \cite{weak-baselines}, BM25 (if tuned well) is still a solid baseline capable of beating even much more complex neural models.
+\subsubsection{Final Thoughts}
+
+Some of the apparent disadvantages of traditional approaches are the lack of semantic meaning that comes from the independence on the word order and the exact word matching. % independence???
+The former may be improved by using n-grams and the latter using character-level features instead of words, especially in inflected languages such as Czech.
+On the other hand, TFIDF is, to this day, a very well-performing low-computation cost ranking function, and as reported by TODO \cite{weak-baselines}, BM25 (if tuned well) is still a solid baseline capable of beating even much more complex neural models.
 
 \section{Neural Approaches}
 
@@ -165,7 +189,7 @@ of the resulting feature vectors is equal to the true value.
 
 \subsection{\nystr{}}
 
-\nystr{} \citep{nystrom} uses "smart" Moore-Penrose inverse approximation. Instead of full $Q$ and $K$ matrices, only segment-means are used, and then the Moore-Penrose inverse is calculated using an iterative algorithm.
+\nystr{} \citep{nystrom} uses ``smart'' Moore-Penrose inverse approximation. Instead of full $Q$ and $K$ matrices, only segment-means are used, and then the Moore-Penrose inverse is calculated using an iterative algorithm.
 
 \subsection{ColBERT}
 
