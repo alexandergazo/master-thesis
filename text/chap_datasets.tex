@@ -15,7 +15,7 @@ The complete FEVER contains 185,445 annotated claims generated using 50,000 popu
 The creation consisted of two steps. The sentences were first manually extracted from popular Wikipedia articles.
 Only the first paragraphs, usually containing the summary, were used for this step. 
 Then, to create a more diverse set of claims, the annotators had the option of producing new claims by mutating the existing ones in various ways (generalizing, specification, entity substitution, non-trivial negating, and rephrasing).
-The negation used has to be non-trivial because simple negative words and phrases like "no" and "it is not true that" can be leveraged by the later steps of the fact-checking pipeline to immediately classify claims as Refuted instead of trying to understand the text.
+The negation used has to be non-trivial because simple negative words and phrases like ``no'' and ``it is not true that'' can be leveraged by the later steps of the fact-checking pipeline to immediately classify claims as Refuted instead of trying to understand the text.
 
 More complex claims were created by providing related Wikipedia articles (articles hyperlinked from the original article) as another source of information while mutating the claim.
 
