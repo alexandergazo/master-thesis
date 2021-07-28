@@ -14,7 +14,7 @@ Similar foreign projects are PolitiFact\footnote{\url{https://www.politifact.com
 Multiple past "public debates", such as the European migrant crisis or the current coronavirus pandemic, have highlighted the need for such systems since there is a need for accurate and up-to-date information.
 The process is very labor-intensive, and thus, there is a natural demand for automatization.
 
-The recent advances in natural language understanding, mainly the introduction of transformer architecture \citep{transformers-vaswani} and the BERT model \citep{bert}, led to new research on the use of neural methods in fact-checking.
+The recent advances in natural language understanding, mainly the introduction of transformer architecture \citep{attention-is-all-you-need} and the BERT model \citep{bert}, led to new research on the use of neural methods in fact-checking.
 The FEVER\footnote{\url{https://fever.ai/}} paper \citep{fever} has led this effort since 2018, focusing on creating a dataset meant for training neural models.
 They succeeded in creating a sizeable human-annotated dataset and were able to train a pipeline model on it.
 The model first retrieved relevant documents (the document retrieval task) and then labeled the initial claim based on these documents. 
@@ -30,8 +30,8 @@ Automatic fact-checking should not be thought of as the miracle cure to the fake
 
 \section*{Transformer Models}
 
-The original transformer architecture \citep{transformers-vaswani} and BERT-model \citep{bert} are based on feeding fully-connected feed-forward networks with token representations aggregated from the whole text, meaning that the information from the input tokens (words or subwords) is adjusted according to their whole context. 
-This mechanism, named attention by the authors \citep{transformers-vaswani}, ``attending'' to all the input tokens for every input token, introduces quadratic time complexity. 
+The original transformer architecture \citep{attention-is-all-you-need} and BERT-model \citep{bert} are based on feeding fully-connected feed-forward networks with token representations aggregated from the whole text, meaning that the information from the input tokens (words or subwords) is adjusted according to their whole context. 
+This mechanism, named attention by the authors \citep{attention-is-all-you-need}, ``attending'' to all the input tokens for every input token, introduces quadratic time complexity. 
 The input of BERT is thus limited to 512 tokens as a design choice.
 Working with this restriction, we decided to split the \CTK{} articles into paragraphs and perform document retrieval on them, theoretically losing joint article meaning.
 
