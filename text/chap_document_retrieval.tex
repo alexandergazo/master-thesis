@@ -29,23 +29,7 @@ The organizators of \textbf{T}ext \textbf{Re}trieval \textbf{C}onference (TREC) 
 We explore NNLM and traditional approaches, emphasizing the NNLM approach while using the other as the baseline. ``Neural Networks'' is reserved for methods that use neural networks only in some parts of its implementation (such as word embeddings) and do not rely explicitly on language modeling. We do not explore such methods in this thesis, and therefore, by neural approach, we refer to NNLM methods
 While both work on entirely different principles, we will use both to generate an indexed version of the knowledge scope.
 
-\COMMENT{%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Traditional approaches will result in sparse representation with the feature dimension size equal typically to the corpus's vocabulary size (the vocabulary can also contain n-grams or character n-grams if it is advantageous).
-Therefore, it can be considered a weighting scheme, assigning "importance" to each word if it was present in the document. 
-Neural approaches used in this paper produce a dense representation, as described by \citet{two-tower}.
-It is usually a fixed-size vector of real numbers, inherently hard to interpret.
-The meaning can be derived only from the relative position of different documents' indexes (vectors).
-
-Neural models can also be used directly as the scoring function as in Section \ref{sec:formal_descr_dr}.
-This can, according to \citet{two-tower}, lead to better performance. However, since the query is provided at runtime, the evaluation cannot be precomputed and has to run for every document each time we enter a new query.
-This is currently infeasible for usage on whole corpora but can be utilized by running on a smaller subset of the corpus (so-called reranking), typically pre-selected by a non-neural model, creating a hybrid approach.
-
-% TODO two-tower paper, 
-In order to solve the document retrieval task, we will focus on finding an appropriate function $f$.
-In this thesis, that means a function suitable for long documents.
-}
-
-% This section introduces the most common methods of document retrieval, as well as new models with great potential.
+This chapter further introduces the most common document retrieval methods and new models with great potential while explaining the main points of the theoretical background.
 
 \section{Traditional Approaches}
 
@@ -121,8 +105,10 @@ $$
         \sum_{t\in q}
         \text{idf}(t, d)
         \cdot \frac{(k_1 + 1)\cdot\text{count}(t, d)}{k_1(1-b + b \cdot (L_d / L_{avg})) + \text{count}(t, d)} 
-        \cdot \frac{(k_3 + 1)\cdot\text{count}(t, q)}{k_3 + \text{count}(t, q)}.
+        \cdot \frac{(k_3 + 1)\cdot\text{count}(t, q)}{k_3 + \text{count}(t, q)}
+\ ,
 $$
+where $\text{count}(t,d)$ is the raw count of the term $t$ in the document $d$.
 
 The first term is IDF.
 The second term is TF with two tuning parameters $k_1$ and $b$. Parameter $k_1$ corresponds directly to TF scaling, while parameter $b$ corresponds to scaling by the inverse of the document's length.
@@ -142,9 +128,103 @@ Since this weighting scheme introduces tunable parameters, it can be trained on 
 
 Some of the apparent disadvantages of traditional approaches are the lack of semantic meaning that comes from the independence on the word order and the exact word matching. % independence???
 The former may be improved by using n-grams and the latter using character-level features instead of words, especially in inflected languages such as Czech.
-On the other hand, TFIDF is, to this day, a very well-performing low-computation cost ranking function, and as reported by TODO \cite{weak-baselines}, BM25 (if tuned well) is still a solid baseline capable of beating even much more complex neural models.
+On the other hand, TFIDF is, to this day, a very well-performing low-computation cost ranking function, and as reported by \cite{weak-baselines}, BM25 (if tuned well) is still a solid baseline capable of beating even much more complex neural models.
 
 \section{Neural Approaches}
+
+Neural approaches using language modeling are models trained on predicting the correct word given some text before.  % maximizing the likelihood of correct word prediction in a text. 
+% More precisely, it is a conditional language modeling since the prediction also depends on provided input.
+Recurrent neural network (RNN) architecture was traditionally used for this task.
+The RNN was fed encoded tokenized input, returning a hidden state which was next fed into the RNN again along the next input token.
+% The RNN was fed encoded tokenized input, and the RNN predicted the next token as depicted in Figure \ref{fig:lec6_slide23}.
+Its hidden states could also be used to encode the input into a fixed-length vector representation, which can be further used to either classify the input or use another RNN (decoder) to generate another sequence.
+Intuitively, the vector contains the meaning of the original input. 
+Such an approach is the Sequence to Sequence (seq2seq or encoder-decoder) model architecture \citep{seq2seq} with significant use-case in machine translation.
+
+As an improvement to the seq2seq models, the attention mechanism was introduced by \citet{first-attention}, explaining their motivation as follows: ``In this paper, we conjecture that the use of a fixed-length vector is a bottleneck in improving the performance of this basic encoder-decoder architecture, and propose to extend this by allowing a model to automatically (soft-)search for parts of a source sentence that are relevant to predicting a target word, without having to form these parts as a hard segment explicitly.'' The attention mechanism is in-depth described in subsection \ref{subsec:attention}.
+
+% TODO check if this sits nicely
+\begin{figure}[b!]
+        \centering
+        \includegraphics[width=.5\textwidth]{transformer.pdf}
+        \caption{The transformer model architecture. Reprinted from \citep{attention-is-all-you-need}.}
+        \label{fig:transformer}
+\end{figure}
+
+The research paper ``Attention Is All You Need'' by \citet{attention-is-all-you-need} improved the RNN-based seq2seq by introducing the transformer architecture, depicted in Figure \ref{fig:transformer}, by substituting the RNN by multiple ``encoder blocks'', that is, attention layer and feedforward network with skip-connection. 
+This resulted in simpler architecture (RNN architectures tend to become very complex when trying to avoid the vanishing gradient problem), parallelization of the computation, and, most importantly, an improved performance. 
+The improvement showed that the attention mechanism was crucial to the past achievements of the seq2seq models, hence the paper's name.
+On the other hand, the attention mechanism also introduces quadratic time complexity, which is why the transformer models are generally used with fixed 512 token input length.
+That might be adequate for most applications, but in document retrieval, the documents might get truncated. 
+% neviem kam to quadratic TODO
+
+Then \textbf{B}idirectional \textbf{E}ncoder \textbf{R}epresentations from \textbf{T}ransformers (BERT) \citep{bert} model was introduced. It was ``designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers''. 
+The model can then be fine-tuned on a specific task using a small amount of labeled data and one additional output layer. 
+
+This was a brief description of how a sequence of research papers -- ``Sequence to Sequence Learning with Neural Networks'' \citep{seq2seq}, ``Neural Machine Translation by Jointly Learning to Align and Translate'' \citep{first-attention}, ``Attention Is All You Need'' \citep{attention-is-all-you-need}, and ``BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding'' \citep{bert} -- led to a shift from RNN-based NLP approaches to, now SOTA, BERT-based approaches.
+This research focus is sometimes referred to as BERTology.
+
+In the following sections, we will explain the concepts mentioned above in greater detail.
+
+%The authors trained the model on a large unlabeled corpus using two tasks. 
+%The first was to predict random masked words, and the second classified whether the second sentence of two selected sentences immediately follows the first one.
+%It is a language modeling encoder capable of non-supervised learning 
+
+\subsection{Attention Mechanism}
+\label{subsec:attention}
+
+The main feature of the transformer models is the attention mechanism. It adjusts each token's embedding based on all the other tokens present in the current input.
+This is done by computing three different projections of the original input tokens and then, based on certain similarities, combining them back together. 
+The attention mechanism is also reffered to as self-attention, since all the tokens in one input attend to the same input.
+
+The projections are computed using trainable matrices $W_Q$, $W_K$, and $W_V$, producing queries $Q$, keys $K$, and values $V$. Then, we compute the dot product (``similarity'') between the keys and the queries $QK^T$, illustrated in Figure \ref{fig:self-attn}.
+The result is normalized by the inverse factor of the square root of the projection dimension. 
+Then softmax is applied, and the result is used as the weights for the weighted average of all value vectors. To put it into an equation: $$\text{softmax}(\frac{QK^T}{\sqrt{d}})V\ .$$
+Therefore, for every token, the result is the weighted average of all the value vectors, based on the similarity between the queries and the keys. 
+The result is called scaled dot-product attention.
+
+\begin{figure}[!htb]
+	\centering
+	\begin{minipage}{.49\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{self_attention_output.png}
+                \caption{Example of self attention mechanism with projection dimension 64 and the input ``Thinking Machines''. Reprinted from \citep{illustrated-transformer}.}
+	\end{minipage}
+        \hfill
+	\begin{minipage}{.49\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{self_attention_visualization.png}
+                \caption{Self-attention mechanism example, where the token for word ``it'' is paying attention to ``the animal'', effectively being substituted for it. The orange color represnts the values from $QK^T$. Reprinted from \citep{illustrated-transformer}.}
+                \label{fig:self-attn}
+	\end{minipage}
+\end{figure}
+
+The computation is performed multiple times in parallel with independent projection matrices to make the mechanism more robust.
+The results are then concatenated and projected into the final dimensionality.
+This extended attention is called multi-head attention.
+The intuition is that different heads might learn to attend to different patterns and meaning subspaces.
+
+\subsection{Transformers}
+
+positional encoding
+
+\subsection{BERTology}
+
+\COMMENT{%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Traditional approaches will result in sparse representation with the feature dimension size equal typically to the corpus's vocabulary size (the vocabulary can also contain n-grams or character n-grams if it is advantageous).
+Therefore, it can be considered a weighting scheme, assigning "importance" to each word if it was present in the document. 
+Neural approaches used in this paper produce a dense representation, as described by \citet{two-tower}.
+It is usually a fixed-size vector of real numbers, inherently hard to interpret.
+The meaning can be derived only from the relative position of different documents' indexes (vectors).
+
+Neural models can also be used directly as the scoring function as in Section \ref{sec:formal_descr_dr}.
+This can, according to \citet{two-tower}, lead to better performance. However, since the query is provided at runtime, the evaluation cannot be precomputed and has to run for every document each time we enter a new query.
+This is currently infeasible for usage on whole corpora but can be utilized by running on a smaller subset of the corpus (so-called reranking), typically pre-selected by a non-neural model, creating a hybrid approach.
+
+% TODO two-tower paper, 
+In order to solve the document retrieval task, we will focus on finding an appropriate function $f$.
+In this thesis, that means a function suitable for long documents.
+}
 
 As mentioned above, when dealing with natural language processing, we can approach the task in two different ways, both described in detail by \cite{two-tower}. 
 
