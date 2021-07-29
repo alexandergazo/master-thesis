@@ -135,7 +135,7 @@ On the other hand, TFIDF is, to this day, a very well-performing low-computation
 Neural approaches using language modeling are models trained on predicting the correct word given some text before.  % maximizing the likelihood of correct word prediction in a text. 
 % More precisely, it is a conditional language modeling since the prediction also depends on provided input.
 Recurrent neural network (RNN) architecture was traditionally used for this task.
-The RNN was fed encoded tokenized input, returning a hidden state which was next fed into the RNN again along the next input token.
+The RNN was fed encoded tokenized input, returning a hidden state which was next fed into the RNN again along with the next input token.
 % The RNN was fed encoded tokenized input, and the RNN predicted the next token as depicted in Figure \ref{fig:lec6_slide23}.
 Its hidden states could also be used to encode the input into a fixed-length vector representation, which can be further used to either classify the input or use another RNN (decoder) to generate another sequence.
 Intuitively, the vector contains the meaning of the original input. 
@@ -154,11 +154,13 @@ As an improvement to the seq2seq models, the attention mechanism was introduced 
 The research paper ``Attention Is All You Need'' by \citet{attention-is-all-you-need} improved the RNN-based seq2seq by introducing the transformer architecture, depicted in Figure \ref{fig:transformer}, by substituting the RNN by multiple ``encoder blocks'', that is, attention layer and feedforward network with skip-connection. 
 This resulted in simpler architecture (RNN architectures tend to become very complex when trying to avoid the vanishing gradient problem), parallelization of the computation, and, most importantly, an improved performance. 
 The improvement showed that the attention mechanism was crucial to the past achievements of the seq2seq models, hence the paper's name.
-On the other hand, the attention mechanism also introduces quadratic time complexity, which is why the transformer models are generally used with fixed 512 token input length.
-That might be adequate for most applications, but in document retrieval, the documents might get truncated.
-Also, the omition of RNNs meant that the input is not longer sequentally processed. 
-While allowing for parallelization, the position information is lost, and therefore position embedding is added. 
-% neviem kam to quadratic TODO
+%On the other hand, the attention mechanism also introduces quadratic time complexity, which acts as a bottleneck in applications, where a longer input is required.
+%That is why the transformer models are generally used with fixed 512 token input length.
+%That might be adequate for most applications, but in document retrieval, the documents might get truncated.
+%Also, the omission of RNNs meant that the input is not longer sequentially processed. 
+%While allowing for parallelization, the position information is lost, and therefore position embedding is added. 
+% NAKONIEC SOM TO POUZIL INDE ALE NECHAL AJ TU NECH TO VIEM POROVNAT
+% neviem kam to quadratic TODO TODODODODODODOD TOTO ASI CELA DRUHA POLKA FAKT PREC TO SA TAM NEHODI
 
 Then \textbf{B}idirectional \textbf{E}ncoder \textbf{R}epresentations from \textbf{T}ransformers (BERT) \citep{bert} model was introduced. It was ``designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers''. 
 The model can then be fine-tuned on a specific task using a small amount of labeled data and one additional output layer. 
@@ -175,15 +177,15 @@ In the following sections, we will explain the concepts mentioned above in great
 \subsection{Word Vectors}
 
 Unlike traditional approaches, neural networks require numbers as their inputs.
-Therefore the tokens have to be encoded into a numeric representation with fixed length.
-The word encoding is just another linear layer (with $vocab\_size \times embedding\_dim$ weight matrix), which can either be trained from scratch, or one could use some pretrained word vectors (the rows of the matrix), such as GloVe \citep{glove} for the English language.
+Therefore the words (tokens) have to be encoded into a numeric representation with a fixed length.
+The word encoding is just another linear layer (with $vocab\_size \times embedding\_dim$ weight matrix), which can be trained from scratch, or one could use pre-trained (for example \citep{glove}) word vectors (the rows of the matrix).
 
 \subsection{Attention Mechanism}
 \label{subsec:attention}
 
 The main feature of the transformer models is the attention mechanism. It adjusts each token's embedding based on all the other tokens present in the current input.
 This is done by computing three different projections of the original input tokens and then, based on certain similarities, combining them back together. 
-The attention mechanism is also reffered to as self-attention, since all the tokens in one input attend to the same input.
+The attention mechanism is also referred to as self-attention since all the tokens in one input attend to the same input.
 
 The projections are computed using trainable matrices $W_Q$, $W_K$, and $W_V$, producing queries $Q$, keys $K$, and values $V$. Then, we compute the dot product (``similarity'') between the keys and the queries $QK^T$, illustrated in Figure \ref{fig:self-attn}.
 The result is normalized by the inverse factor of the square root of the projection dimension. 
@@ -213,12 +215,71 @@ The intuition is that different heads might learn to attend to different pattern
 	\end{minipage}
 \end{figure}
 
+While the benefits of the attention mechanism are undeniable \citep{attention-is-all-you-need}, on the other hand, it introduces quadratic time complexity by employing the ``one on one'' approach, which acts as a bottleneck in applications, where a longer input is required.
+That is why the transformer models generally have the input length fixed to 512 tokens (shorter inputs are padded, longer truncated).
+That might be adequate for most applications, but in document retrieval, valuable information might get lost.
+
 \subsection{Transformer and BERT}
 
-BERT 
-positional encoding
+As mentioned earlier, the transformer architecture no longer uses RNNs.
+The omission meant that the input is not longer sequentially processed.
+While allowing for better performance through parallelization, the position information is lost, and therefore the information has to be added to each input token.
+The solution is embedding the position into the same dimension as the word (token) vectors and then adding the positional embedding to the token's embedding.
+The position embedding is fixed, non-trainable, and defined as a vector of trigonometric functions applied to the position index, depicted in Figure \ref{fig:pos_emb}.
+The authors provide a detailed explanation in \citep[Section 3.5]{attention-is-all-you-need}.
+
+%TODO check position
+\begin{figure}[!htb]
+        \centering
+        \includegraphics[width=\textwidth]{transformer_positional_encoding.png}
+        \caption{Transformer positional encoding as described in \citep{attention-is-all-you-need}. Input length is 20 tokens with the embedding dimension of 512. For better visualization, the originally alternating $\sin$ and $\cos$ functions are divided to the left and right half, respectively. Reprinted from \citep{illustrated-transformer}.}
+        \label{fig:pos_emb}
+\end{figure}
+
+While seq2seq architecture can work with arbitrary sequence types, BERT is a language model working with text input. 
+Specifically, it is just the encoder part of the seq2seq architecture, meant for computing real-valued fixed-length vector representation of the input that can further be used by other neural models (usually shallow fully-connected feedforward networks).
+The encoder is trained on a large amount of unlabeled text data (corpus) in a phase called pre-training.
+This phase, accounting for a great number of the model's parameters ($\approx$ 110 million in its base form), consumes a significant amount of power. 
+The model can then be fine-tuned, that is, trained for the task we want to apply it on, such as Named Entity Recognition (NER), Natural Language Inference (NLI), or Question Answering (QA). 
+This is done by usually adding one fully connected layer after the encoder output and relatively short training (of all parameters) with the usage of a smaller amount of labeled data. 
+
+Intuitively, the pre-training ``teaches'' the language and word meanings while the fine-tuning only ``explains'' the final task to the model.
 
 \subsection{BERTology}
+
+The research focus on BERT-like models resulted in a great number of papers introducing minor and major changes to the BERT's architecture.
+We will focus on modifying the attention mechanism so that longer inputs are no longer the limiting factor during computation. 
+%We will focus on the ones modifying the attention mechanism in such a way that larger inputs are no longer the limiting factor during computation. 
+
+\subsubsection{Longformer}
+
+Longformer model \citep{longformer} arises when instead of computing the whole $QK^T$, only certain regions (usually specific diagonals) are calculated, thus reducing the model time complexity allowing for longer inputs.
+Huggingface models are available.
+
+\subsubsection{Reformer}
+
+Reformer model \citep{reformer} offers two improvements to the transformer model.
+The first is the usage of locality-sensitive hashing in the attention mechanism, which in order to approximate the full attention matrix focuses for each input token only on the closest tokens.
+The closest tokens are found using the locality-sensitive hashing function.
+This, coupled with memory-saving features, offers a model which can have a whole novel as its single input.
+
+\subsubsection{Performer}
+
+Performer model \citep{performer} looks at the self-attention mechanism as a kernel function and introduces randomized feature functions such that the expected value of scalar product %????%e
+of the resulting feature vectors is equal to the true value.
+% TODO weak ensurences
+
+\subsubsection{\nystr{}}
+
+\nystr{} \citep{nystrom} uses ``smart'' Moore-Penrose inverse approximation. Instead of full $Q$ and $K$ matrices, only segment-means are used, and then the Moore-Penrose inverse is calculated using an iterative algorithm.
+
+\subsubsection{ColBERT}
+
+\citep{colbert}
+TODO Martinove výsledky cite
+
+
+\subsection{Encoder Usage}
 
 \COMMENT{%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Traditional approaches will result in sparse representation with the feature dimension size equal typically to the corpus's vocabulary size (the vocabulary can also contain n-grams or character n-grams if it is advantageous).
@@ -249,41 +310,15 @@ The obvious disadvantage is the need for additional space to store the precomput
 
 We will be using the second approach as our computational resources are limited.
 
-% TODO under this line ---------------------------------
 \subsection{BERT}
+
+% TODO toto je prilis pekne napisane aby bolo vyhodene
+\COMMENT{%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 In 2018, BERT \citep{bert} the now well-established NLP model was introduced. The model is pre-trained using the masked language modeling task and the next sentence prediction task.
-The defining feature of BERT is its self-attention mechanism, which attends to the whole input at once and transforms input tokens based on full context, both left, and right to the token.
+The defining feature of BERT is its self-attention mechanism, which attends to the whole input at once and transforms input tokens based on full context, both left and right to the token.
 Since the "each versus each" approach is employed, this mechanism naturally introduces $O(N^2)$ time complexity, which acts as a bottleneck in applications, where a longer input is required.
 Since its introduction, there have been many well-performing models based on BERT (this movement is sometimes referred to as "BERTology").
-In this thesis, we will focus on models which use similar architecture and modify attention mechanism in order to be able to compute long inputs.
+In this thesis, we will focus on models which use similar architecture and modify the attention mechanism in order to be able to compute long inputs.
+}
 % used usually for GLUE benchmark which is not???? for document retrieval
 % TODO maybe include attention formula
-
-\subsection{Longformer}
-
-Longformer model \citep{longformer} arises when instead of computing the whole $QK^T$, only certain regions (usually specific diagonals) are calculated, thus reducing the model time complexity allowing for longer inputs.
-Huggingface models are available.
-
-\subsection{Reformer}
-
-Reformer model \citep{reformer} offers two improvements to the transformer model.
-The first is the usage of locality-sensitive hashing in the attention mechanism, which in order to approximate the full attention matrix focuses for each input token only on the closest tokens.
-The closest tokens are found using the locality-sensitive hashing function.
-This, coupled with memory saving features, offers a model which can have a whole novel as its single input.
-
-\subsection{Performer}
-
-Performer model \citep{performer} looks at the self-attention mechanism as a kernel function and introduces randomized feature functions such that the expected value of scalar product %????%e
-of the resulting feature vectors is equal to the true value.
-% TODO weak ensurences
-
-\subsection{\nystr{}}
-
-\nystr{} \citep{nystrom} uses ``smart'' Moore-Penrose inverse approximation. Instead of full $Q$ and $K$ matrices, only segment-means are used, and then the Moore-Penrose inverse is calculated using an iterative algorithm.
-
-\subsection{ColBERT}
-
-\citep{colbert}
-TODO Martinove výsledky cite
-
-
