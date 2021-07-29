@@ -155,7 +155,9 @@ The research paper ``Attention Is All You Need'' by \citet{attention-is-all-you-
 This resulted in simpler architecture (RNN architectures tend to become very complex when trying to avoid the vanishing gradient problem), parallelization of the computation, and, most importantly, an improved performance. 
 The improvement showed that the attention mechanism was crucial to the past achievements of the seq2seq models, hence the paper's name.
 On the other hand, the attention mechanism also introduces quadratic time complexity, which is why the transformer models are generally used with fixed 512 token input length.
-That might be adequate for most applications, but in document retrieval, the documents might get truncated. 
+That might be adequate for most applications, but in document retrieval, the documents might get truncated.
+Also, the omition of RNNs meant that the input is not longer sequentally processed. 
+While allowing for parallelization, the position information is lost, and therefore position embedding is added. 
 % neviem kam to quadratic TODO
 
 Then \textbf{B}idirectional \textbf{E}ncoder \textbf{R}epresentations from \textbf{T}ransformers (BERT) \citep{bert} model was introduced. It was ``designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers''. 
@@ -170,6 +172,12 @@ In the following sections, we will explain the concepts mentioned above in great
 %The first was to predict random masked words, and the second classified whether the second sentence of two selected sentences immediately follows the first one.
 %It is a language modeling encoder capable of non-supervised learning 
 
+\subsection{Word Vectors}
+
+Unlike traditional approaches, neural networks require numbers as their inputs.
+Therefore the tokens have to be encoded into a numeric representation with fixed length.
+The word encoding is just another linear layer (with $vocab\_size \times embedding\_dim$ weight matrix), which can either be trained from scratch, or one could use some pretrained word vectors (the rows of the matrix), such as GloVe \citep{glove} for the English language.
+
 \subsection{Attention Mechanism}
 \label{subsec:attention}
 
@@ -183,6 +191,12 @@ Then softmax is applied, and the result is used as the weights for the weighted 
 Therefore, for every token, the result is the weighted average of all the value vectors, based on the similarity between the queries and the keys. 
 The result is called scaled dot-product attention.
 
+The computation is performed multiple times in parallel with independent projection matrices to make the mechanism more robust.
+The results are then concatenated and projected into the final dimensionality.
+This extended attention is called multi-head attention.
+The intuition is that different heads might learn to attend to different patterns and meaning subspaces.
+
+% TODO check if correct position
 \begin{figure}[!htb]
 	\centering
 	\begin{minipage}{.49\textwidth}
@@ -199,13 +213,9 @@ The result is called scaled dot-product attention.
 	\end{minipage}
 \end{figure}
 
-The computation is performed multiple times in parallel with independent projection matrices to make the mechanism more robust.
-The results are then concatenated and projected into the final dimensionality.
-This extended attention is called multi-head attention.
-The intuition is that different heads might learn to attend to different patterns and meaning subspaces.
+\subsection{Transformer and BERT}
 
-\subsection{Transformers}
-
+BERT 
 positional encoding
 
 \subsection{BERTology}
