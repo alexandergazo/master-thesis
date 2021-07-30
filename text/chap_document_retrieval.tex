@@ -265,7 +265,7 @@ Given multiple encoder blocks of the transformer architecture (Figure \ref{fig:t
 Additionally, a ``dilated'' window attention was used, where the window contains gaps of parametrized size. 
 The authors claim that using different sizes of dilation per attention head proved to be beneficial.
 
-The model benefits from different attention patterns in different applications and might require that some positions attend to the whole input, for example in QA it is importand to attend to the question.
+The model benefits from different attention patterns in different applications and might require that some positions attend to the whole input; for example, in question answering, it is important to attend to the question.
 Thus, the authors use another set of projections in the attention mechanism (initialized from the windowed attention) called global attention.
 It arises by allowing some positions to attend to the whole input and making the whole input sequence attend to them, as in Figure \ref{fig:longformer_attention}.  %TODO check 
 
