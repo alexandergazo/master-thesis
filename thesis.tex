@@ -51,7 +51,7 @@
 \usepackage{graphicx}       % embedding of pictures
 \usepackage{fancyvrb}       % improved verbatim environment
 \usepackage[round]{natbib}         % citation style AUTHOR (YEAR), or AUTHOR [NUMBER]
-\usepackage[nottoc]{tocbibind} 
+\usepackage[nottoc,notlof,notlot]{tocbibind} 
 					% makes sure that bibliography and the lists
 				    % of figures/tables are included in the table
 				    % of contents
@@ -61,6 +61,7 @@
 \usepackage{multirow}
 \usepackage{framed}
 \usepackage{pdfpages}
+\usepackage{subcaption}
 %\usepackage[usenames]{xcolor}  % typesetting in color
 
 
@@ -83,6 +84,8 @@
 %%% A page with the automatically generated table of contents of the bachelor thesis
 
 \tableofcontents
+\listoffigures
+\listoftables
 
 %%% Each chapter is kept in a separate file
 \include{text/preface}
