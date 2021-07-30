@@ -61,7 +61,7 @@ $$\text{tfidf}(t,d,D)=\text{tf}(t,d)\cdot\text{idf}(t,D)\ .$$
 		\centering
 		\includegraphics[width=\linewidth]{tfidf.png}
 	\end{minipage}
-        \caption{Visualization of TFIDF depending on the term frequency and the frequency of the documents containing the term.}
+        \caption[Visualization of TFIDF]{Visualization of TFIDF depending on the term frequency and the frequency of the documents containing the term.}
 \end{figure}
 
 We have explained how to compute a term's weight (``importance'') for a specific document.
@@ -117,7 +117,7 @@ It shows \citep{schutze2008introduction} that this term is only valid for longer
 \begin{figure}[h!]
     \centering
     \includegraphics[width=.9\textwidth]{bm25.png}
-    \caption{TF term's relation to the length of the current document for $k=1.2$ and $b=0.75$.}
+    \caption[BM25 TF Visualization]{TF term's relation to the length of the current document for $k=1.2$ and $b=0.75$.}
 \end{figure}
 
 Since this weighting scheme introduces tunable parameters, it can be trained on data. If the data is not available, \citet[Section 11.4.3]{schutze2008introduction} recommend using $k_1, k_3 \in [1.2;2]$ and $b=0.75$.
@@ -147,7 +147,7 @@ As an improvement to the seq2seq models, the attention mechanism was introduced 
 \begin{figure}[b!]
         \centering
         \includegraphics[width=.5\textwidth]{transformer.pdf}
-        \caption{The transformer model architecture. Reprinted from \citep{attention-is-all-you-need}.}
+        \caption[Transformer Model Architecture]{The transformer model architecture. Reprinted from \citep{attention-is-all-you-need}.}
         \label{fig:transformer}
 \end{figure}
 
@@ -184,12 +184,16 @@ The word encoding is just another linear layer (with $vocab\_size \times embeddi
 \label{subsec:attention}
 
 The main feature of the transformer models is the attention mechanism. It adjusts each token's embedding based on all the other tokens present in the current input.
-This is done by computing three different projections of the original input tokens and then, based on certain similarities, combining them back together. 
+This is done by computing three different linear projections of the original input tokens and then, based on certain similarities, combining them back together. 
 The attention mechanism is also referred to as self-attention since all the tokens in one input attend to the same input.
 
 The projections are computed using trainable matrices $W_Q$, $W_K$, and $W_V$, producing queries $Q$, keys $K$, and values $V$. Then, we compute the dot product (``similarity'') between the keys and the queries $QK^T$, illustrated in Figure \ref{fig:self-attn}.
 The result is normalized by the inverse factor of the square root of the projection dimension. 
-Then softmax is applied, and the result is used as the weights for the weighted average of all value vectors. To put it into an equation: $$\text{softmax}(\frac{QK^T}{\sqrt{d}})V\ .$$
+Then softmax is applied, and the result is used as the weights for the weighted average of all value vectors. To put it into an equation: 
+\begin{equation}
+  \text{Attention}(Q,K,V) = \text{softmax}(\frac{QK^T}{\sqrt{d}})V\ .
+  \label{eq:attention}
+\end{equation}
 Therefore, for every token, the result is the weighted average of all the value vectors, based on the similarity between the queries and the keys. 
 The result is called scaled dot-product attention.
 
@@ -204,13 +208,13 @@ The intuition is that different heads might learn to attend to different pattern
 	\begin{minipage}{.49\textwidth}
 		\centering
 		\includegraphics[width=\linewidth]{self_attention_output.png}
-                \caption{Example of self attention mechanism with projection dimension 64 and the input ``Thinking Machines''. Reprinted from \citep{illustrated-transformer}.}
+                \caption[Attention Mechanism Computation Example]{Example of self attention mechanism with projection dimension 64 and the input ``Thinking Machines''. Reprinted from \citep{illustrated-transformer}.}
 	\end{minipage}
         \hfill
 	\begin{minipage}{.49\textwidth}
 		\centering
 		\includegraphics[width=\linewidth]{self_attention_visualization.png}
-                \caption{Self-attention mechanism example, where the token for word ``it'' is paying attention to ``the animal'', effectively being substituted for it. The orange color represnts the values from $QK^T$. Reprinted from \citep{illustrated-transformer}.}
+                \caption[Attention Values Visualization]{Self-attention mechanism example, where the token for word ``it'' is paying attention to ``the animal'', effectively being substituted for it. The orange color represnts the values from $QK^T$. Reprinted from \citep{illustrated-transformer}.}
                 \label{fig:self-attn}
 	\end{minipage}
 \end{figure}
@@ -232,7 +236,7 @@ The authors provide a detailed explanation in \citep[Section 3.5]{attention-is-a
 \begin{figure}[!htb]
         \centering
         \includegraphics[width=\textwidth]{transformer_positional_encoding.png}
-        \caption{Transformer positional encoding as described in \citep{attention-is-all-you-need}. Input length is 20 tokens with the embedding dimension of 512. For better visualization, the originally alternating $\sin$ and $\cos$ functions are divided to the left and right half, respectively. Reprinted from \citep{illustrated-transformer}.}
+        \caption[Positional Encoding of Transformer's Input]{Transformer positional encoding as described in \citep{attention-is-all-you-need}. Input length is 20 tokens with the embedding dimension of 512. For better visualization, the originally alternating $\sin$ and $\cos$ functions are divided to the left and right half, respectively. Reprinted from \citep{illustrated-transformer}.}
         \label{fig:pos_emb}
 \end{figure}
 
@@ -253,13 +257,35 @@ We will focus on modifying the attention mechanism so that longer inputs are no 
 
 \subsubsection{Longformer}
 
-Longformer model \citep{longformer} arises when instead of computing the whole $QK^T$, only certain regions (usually specific diagonals) are calculated, thus reducing the model time complexity allowing for longer inputs.
-Huggingface models are available.
+The Longformer architecture \citep{longformer} represents the simplest form of the attention mechanism modification.
+Instead of computing the whole $QK^T$, only certain regions (usually specific diagonals) are calculated, thus reducing the model time complexity allowing for longer inputs.
+
+The authors proposed attention windows that ensured that each token attended only to a fixed number of the neighboring tokens. 
+Given multiple encoder blocks of the transformer architecture (Figure \ref{fig:transformer}), each token eventually attends to all the input tokens, similarly to CNNs.  
+Additionally, a ``dilated'' window attention was used, where the window contains gaps of parametrized size. 
+The authors claim that using different sizes of dilation per attention head proved to be beneficial.
+
+The model benefits from different attention patterns in different applications and might require that some positions attend to the whole input, for example in QA it is importand to attend to the question.
+Thus, the authors use another set of projections in the attention mechanism (initialized from the windowed attention) called global attention.
+It arises by allowing some positions to attend to the whole input and making the whole input sequence attend to them, as in Figure \ref{fig:longformer_attention}.  %TODO check 
+
+% TODO check position
+\begin{figure}[!htb]
+        \centering
+        \includegraphics[width=\textwidth]{longformer_attention.pdf}
+        \caption[Longformer Attention Patterns]{Original attention and Longormer attention patterns. Reprinted from \citep{longformer}.}
+        \label{fig:longformer_attention}
+\end{figure}
+
+To utilize the benefits of this sparsified attention, the authors had to implement a custom CUDA kernel capable of computing parts of matrix multiplication effectively. 
 
 \subsubsection{Reformer}
 
-Reformer model \citep{reformer} offers two improvements to the transformer model.
-The first is the usage of locality-sensitive hashing in the attention mechanism, which in order to approximate the full attention matrix focuses for each input token only on the closest tokens.
+Reformer architecture \citep{reformer} offers two changes to the transformer model.
+The first is the usage of locality-sensitive hashing (LSH) \citep{lsh} in the attention mechanism, and the second is the use of reversible residual networks (RevNets) \citep{revnets}.
+
+The main idea behind the reformer's attention is that softmax values from Equation \ref{eq:attention} are most influenced by the largest values. 
+To approximate the full attention matrix focuses for each input token only on the closest tokens.
 The closest tokens are found using the locality-sensitive hashing function.
 This, coupled with memory-saving features, offers a model which can have a whole novel as its single input.
 
@@ -281,7 +307,21 @@ TODO Martinove výsledky cite
 
 \subsection{Encoder Usage}
 
-\COMMENT{%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Scratch}
+
+As mentioned above, when dealing with natural language processing, we can approach the task in two different ways, both described in detail by \cite{two-tower}. 
+
+The first is to have the document-query pair $(d,q)$ on the input of the neural model (cross-attention model).
+One of the benefits is the direct usage of the neural model on the downstream tasks, possibly granting better performance.
+
+The second approach is to preprocess the whole database of documents by the model and then using some metric for choosing the documents related to the query based on the computed representation.
+The obvious advantage is the offline preprocessing and thus improved performance during inference.
+Only the unseen query has to be processed by the neural model followed by computing the metric between the documents' representation and the query representation.
+This is usually way faster than using a neural model for every document and can also be significantly speedup \citep{faiss}.
+The obvious disadvantage is the need for additional space to store the precomputed representation.
+
+We will be using the second approach as our computational resources are limited.
+
 Traditional approaches will result in sparse representation with the feature dimension size equal typically to the corpus's vocabulary size (the vocabulary can also contain n-grams or character n-grams if it is advantageous).
 Therefore, it can be considered a weighting scheme, assigning "importance" to each word if it was present in the document. 
 Neural approaches used in this paper produce a dense representation, as described by \citet{two-tower}.
@@ -295,30 +335,12 @@ This is currently infeasible for usage on whole corpora but can be utilized by r
 % TODO two-tower paper, 
 In order to solve the document retrieval task, we will focus on finding an appropriate function $f$.
 In this thesis, that means a function suitable for long documents.
-}
-
-As mentioned above, when dealing with natural language processing, we can approach the task in two different ways, both described in detail by \cite{two-tower}. 
-
-The first is to have the document-query pair $(d,q)$ on the input of the neural model (cross-attention model).
-One of the benefits is the direct usage of the neural model on the downstream tasks, possibly granting better performance.
-
-The second approach is to preprocess the whole database of documents by the model and then using some metric for choosing the documents related to the query based on the computed representation.
-The obvious advantage is the offline preprocessing and thus improved performance during inference.
-Only the unseen query has to be processed by the neural model followed by computing the metric between the documents' representation and the query representation.
-This is usually way faster than using a neural model for every document and can also be significantly spedup \citep{faiss}.
-The obvious disadvantage is the need for additional space to store the precomputed representation.
-
-We will be using the second approach as our computational resources are limited.
-
-\subsection{BERT}
 
 % TODO toto je prilis pekne napisane aby bolo vyhodene
-\COMMENT{%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 In 2018, BERT \citep{bert} the now well-established NLP model was introduced. The model is pre-trained using the masked language modeling task and the next sentence prediction task.
 The defining feature of BERT is its self-attention mechanism, which attends to the whole input at once and transforms input tokens based on full context, both left and right to the token.
 Since the "each versus each" approach is employed, this mechanism naturally introduces $O(N^2)$ time complexity, which acts as a bottleneck in applications, where a longer input is required.
 Since its introduction, there have been many well-performing models based on BERT (this movement is sometimes referred to as "BERTology").
 In this thesis, we will focus on models which use similar architecture and modify the attention mechanism in order to be able to compute long inputs.
-}
 % used usually for GLUE benchmark which is not???? for document retrieval
 % TODO maybe include attention formula
