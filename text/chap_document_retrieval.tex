@@ -219,10 +219,6 @@ The intuition is that different heads might learn to attend to different pattern
 	\end{minipage}
 \end{figure}
 
-While the benefits of the attention mechanism are undeniable \citep{attention-is-all-you-need}, on the other hand, it introduces quadratic time complexity by employing the ``one on one'' approach, which acts as a bottleneck in applications, where a longer input is required.
-That is why the transformer models generally have the input length fixed to 512 tokens (shorter inputs are padded, longer truncated).
-That might be adequate for most applications, but in document retrieval, valuable information might get lost.
-
 \subsection{Transformer and BERT}
 
 As mentioned earlier, the transformer architecture no longer uses RNNs.
@@ -249,10 +245,19 @@ This is done by usually adding one fully connected layer after the encoder outpu
 
 Intuitively, the pre-training ``teaches'' the language and word meanings while the fine-tuning only ``explains'' the final task to the model.
 
+\subsection{Transformer's Computational Limits}
+
+While the benefits of the attention mechanism are undeniable \citep{attention-is-all-you-need}, on the other hand, it introduces quadratic time and space complexity by employing the ``one on one'' approach coupled with the non-linear softmax operation, which prevents various optimization techniques to be applied.
+That is why the attention mechanism acts as a bottleneck in applications, where a longer input is required.
+Transformer models, therefore, generally have the input length fixed to 512 tokens (shorter inputs are padded, longer truncated).
+That might be adequate for most applications, but in document retrieval, valuable information might get lost.
+
+Other parts of the transformer architecture too use a large amount of memory. During training, the activations of every encoder layer have to be stored for back-propagation. Feedforward layers in the encoder blocks are also nontrivially large.
+
 \subsection{BERTology}
 
 The research focus on BERT-like models resulted in a great number of papers introducing minor and major changes to the BERT's architecture.
-We will focus on modifying the attention mechanism so that longer inputs are no longer the limiting factor during computation. 
+We will focus on modifying the attention mechanism so that longer inputs are no longer the limiting factor during computation.
 %We will focus on the ones modifying the attention mechanism in such a way that larger inputs are no longer the limiting factor during computation. 
 
 \subsubsection{Longformer}
@@ -284,16 +289,64 @@ To utilize the benefits of this sparsified attention, the authors had to impleme
 Reformer architecture \citep{reformer} offers two changes to the transformer model.
 The first is the usage of locality-sensitive hashing (LSH) \citep{lsh} in the attention mechanism, and the second is the use of reversible residual networks (RevNets) \citep{revnets}.
 
-The main idea behind the reformer's attention is that softmax values from Equation \ref{eq:attention} are most influenced by the largest values. 
-To approximate the full attention matrix focuses for each input token only on the closest tokens.
-The closest tokens are found using the locality-sensitive hashing function.
-This, coupled with memory-saving features, offers a model which can have a whole novel as its single input.
+The main idea behind the Reformer's attention is that softmax output from Equation \ref{eq:attention} is influenced most by the largest values of $QK^T$. 
+Since the output of $QK^T$ represents the dot products between the rows of $Q$ and $K$, the largest values are those, for which are the vectors from $Q$ and $K$ closest to each other.
+The problem of finding the closest vectors is still in $\bigO(n^2)$ since we need to compute the cosine distance between all the vector pairs -- we would need to compute $QK^T$ nonetheless. %??? TODO check grammar
+Here the authors utilize LSH for finding the closest vectors.
+Hash function $h(x)$ is locality-sensitive if it maps nearby vectors to the same hash with high probability. 
+The simplified base idea is that under random linear projections (randomly initialized matrix) into $n_{buckets}$ dimensional space, nearby vectors preserve their orientation, thus sharing the index of the dimension where they show the highest values.
+Multiple random projections are performed in parallel to reduce the probability of similar vectors differing in the maximal indices.
+After the LSH computation is finished, each vector has been assigned to a ``bucket''.
+Then the matrix $Q$ is sorted so that vectors from the same buckets are in a sequence.
+What follows is the computation of full attention, but only on parts of the sorted matrix.
+The parts are selected so that each bucket attends to all of the vectors in the bucket and one previous bucket, see Figure \ref{fig:reformer_buckets}.
+The authors also noted that setting $Q=K$ did not negatively impact the model's performance, and therefore LSH is applied only to the matrix $Q$.
+
+Another way to look at the LSH bucketing is to compute the dot product of the input vectors with a sequence of $\dfrac{n_{buckets}}{2}$ random vectors followed by their negative counterparts, of the same dimension as the input vectors.
+Since cosine-similar vectors produce the highest values of dot products, we can be confident that vectors are similar if they shared the highest dot product values with the same random vectors even after multiple rounds of these projections.
+
+\begin{figure}[!htb]
+        \centering
+        \includegraphics[width=\textwidth]{reformer_buckets.png}
+        \caption[Reformer Attention Visualization]{Reformer attention buckets. Reprinted from \citep{reformer}.}
+        \label{fig:reformer_buckets}
+\end{figure}
+
+In order to reduce the memory complexity, the Reformer model applies three methods.
+The first one is the use of RevNets \citep{revnets} discarding the need for storing layers' activations (Figure \ref{fig:revnets}). The second one is the use of ``chunking'' -- feeding only ``chunks'' of input at a time through the linear layers.
+The last one is the swapping of the parameters of currently unused layer from GPU to CPU. This would not be efficient in normal transformers, but since Reformer is able to work with inputs even 16,000 tokens long, the authors claim that ``the amount of compute done with the parameters amortizes the cost of their transfer.''
+
+\begin{figure}[!htb]
+        \centering
+        \includegraphics{revnets.pdf}
+        \caption[RevNet Scheme]{The forward \textbf{(a)} and the backward \textbf{(b)} computations scheme of a residual block. Reprinted from \citep{revnets}.}
+        \label{fig:revnets}
+\end{figure}
 
 \subsubsection{Performer}
 
-Performer model \citep{performer} looks at the self-attention mechanism as a kernel function and introduces randomized feature functions such that the expected value of scalar product %????%e
-of the resulting feature vectors is equal to the true value.
-% TODO weak ensurences
+TODO WARNING MIGHT NOT BE USED
+Performer model \citep{performer} looks at the self-attention mechanism, concretely at the softmax substep $A=\exp(\frac{QK^T}{\sqrt{d}})$, as a randomized kernel function: 
+\begin{equation}
+    A_{i,j}=K(q_i,k_j)=\mathbb{E}[\phi(q_i)^T\phi(k_j)]\ ,
+\end{equation}
+where K is a kernel function $K\colon\R^d\times\R^d\rightarrow\R$ defined for a feature map $\phi\colon\R^d\rightarrow\R^r$.
+The authors approximate the attention by using the randomized feature map to define matrices $Q', K'\in\R^{n\times r}$, with the rows equal to $\phi(q_i^T)^T$ and $\phi(k_i^T)^T$, respectivelly.
+Then, by calculating in the paranthesized order
+\begin{equation}
+        AV = (Q'(K'V))
+\end{equation}
+the authors reduce the time complexity from $\bigO(n^2d)$ to $\bigO(nrd)$.
+The paper then deals with finding suitable randomized feature maps with adequate theoretical assurances. 
+The authors propose a general form
+\begin{equation}
+        \phi(x)=\frac{h(x)}{\sqrt{m}}(f_1(\omega_1^Tx),\dots,f_1(\omega_m^Tx),
+        \dots,f_l(\omega_1^Tx),\dots,f_l(\omega_m^Tx))\ ,
+\end{equation}
+where $f_1,\dots,f_l\colon\R\rightarrow\R$, $g\colon\R^d\rightarrow\R$ and $\omega_1,\dots,\omega_m\overset{\text{iid}}{\sim}\mathcal{D}$ for some distribution $\mathcal{D}\in\powerset{\R}^d$.
+
+The authors conclude their theoretical research by guaranteeing ``unbiased or nearly-unbiased estimation of the attention matrix, uniform convergence and low estimation variance'' for $h(x)=\exp(\frac{||x||}{2})$, $l=2$, $f_1=\cos$, $f_2=\sin$, $\mathcal{D}=\mathcal{N}(0,\textbf{I}_d)$, and ensuring that $\omega_1,\dots,\omega_m$ are perpendicular to each other, \citep[Theorem 4]{performer}.
+The parameter $m$ does depend on the L2-norm of the queries and keys, the dimensionality of the embeddings, and the required precision, but does not depend on the input sequence length $n$.
 
 \subsubsection{\nystr{}}
 
