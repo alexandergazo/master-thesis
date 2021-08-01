@@ -12,7 +12,10 @@ For our uses, the query is the claim to be fact-checked, and the document databa
 \section{Formal Description}
 \label{sec:formal_descr_dr}
 The task can be formally described \citep{two-tower} using a scoring function (sometimes referred to as ranking function) %article before ranking maybe
-$$f_\mathcal{D}\colon\mathcal{D}\times\mathcal{Q}\rightarrow\R$$
+\begin{equation}
+        f_\mathcal{D}\colon\mathcal{D}\times\mathcal{Q}\rightarrow\R
+        \label{eq:formal_descr_dr}
+\end{equation}
 that maps a document-query pair $(d, q)$ to a score $f(d,q)$. 
 Then, typically, the documents in pairs with the highest scores are considered to be the proposed solution to the task. 
 
@@ -78,8 +81,8 @@ We obtain $|D|\times {vocabulary\_size}$ matrix $V$ of TFIDF values.
 %This formula can be improved -- in this form, it favors longer queries $q$. % DOES IT? TODO
 %We can also precompute the TFIDF values for each document and vocabulary word in the corpus.
 %Thus we obtain $|D|\times {vocabulary\_size}$ matrix $V$ of TFIDF values.
-Here, to simplify length normalization, we normalize the matrix V so that each row has unit norm.
-This step removes the need of normalization in the TFIDF formula and we may use raw term count instead of the normalized frequency.
+Here, to simplify length normalization, we normalize the matrix V so that each row has a unit norm.
+This step removes the need for normalization in the TFIDF formula, and we may use raw term count instead of the normalized frequency.
 To get the relevance of each document to the query $q$, that is $f_D(q, d)$, we first represent the query $q$ as a bag of words vector (BOW), corresponding to the columns of our precomputed TFIDF matrix $V$, ignoring words that appear only in the query.
 The resulting score is then the normalized (not to favor long queries) dot product of a row of the matrix and the BOW representation of the query $q$ denoted $\vec{q}$.
 We can obtain the scores for every query document pair by matrix multiplication:
@@ -131,6 +134,7 @@ The former may be improved by using n-grams and the latter using character-level
 On the other hand, TFIDF is, to this day, a very well-performing low-computation cost ranking function, and as reported by \cite{weak-baselines}, BM25 (if tuned well) is still a solid baseline capable of beating even much more complex neural models.
 
 \section{Neural Approaches}
+\label{sec:neural_approaches}
 
 Neural approaches using language modeling are models trained on predicting the correct word given some text before.  % maximizing the likelihood of correct word prediction in a text. 
 % More precisely, it is a conditional language modeling since the prediction also depends on provided input.
@@ -256,7 +260,7 @@ Other parts of the transformer architecture too use a large amount of memory. Du
 
 \subsection{BERTology}
 
-The research focus on BERT-like models resulted in a great number of papers introducing minor and major changes to the BERT's architecture.
+The research focus on BERT-like models resulted in many papers introducing minor and major changes to the BERT's architecture.
 We will focus on modifying the attention mechanism so that longer inputs are no longer the limiting factor during computation.
 %We will focus on the ones modifying the attention mechanism in such a way that larger inputs are no longer the limiting factor during computation. 
 
@@ -270,7 +274,7 @@ Given multiple encoder blocks of the transformer architecture (Figure \ref{fig:t
 Additionally, a ``dilated'' window attention was used, where the window contains gaps of parametrized size. 
 The authors claim that using different sizes of dilation per attention head proved to be beneficial.
 
-The model benefits from different attention patterns in different applications and might require that some positions attend to the whole input; for example, in question answering, it is important to attend to the question.
+In different applications the model performs better with different attention patterns and it might require that some positions attend to the whole input; for example, in question answering, it is essential to attend to the question.
 Thus, the authors use another set of projections in the attention mechanism (initialized from the windowed attention) called global attention.
 It arises by allowing some positions to attend to the whole input and making the whole input sequence attend to them, as in Figure \ref{fig:longformer_attention}.  %TODO check 
 
@@ -396,7 +400,7 @@ Figure \ref{fig:nystrom_example} provides anecdotal comparison between full self
 \begin{figure}[!htb]
         \centering
         \includegraphics{nystrom_example.pdf}
-        \caption[\nystr{} Attention Example]{Comparision of the true attention and Nystr\"om approximation. Reprinted from \citep{nystrom}.}
+        \caption[\nystr{} Attention Example]{Anecdotal comparision of the true attention and Nystr\"om approximation. Reprinted from \citep{nystrom}.}
         \label{fig:nystrom_example}
 \end{figure}
 
@@ -404,48 +408,76 @@ The authors note that thanks to the theoretical results from \citep{nystr-2017} 
 The first paper states that the error of Nystr\"om approximation decreases with the matrix's rank.
 In the second paper, the authors suggest that the attention mechanism produces low-rank matrices.  
 
-\subsubsection{ColBERT}
-
-\citep{colbert}
-TODO Martinove výsledky cite
-
-
 \subsection{Encoder Usage}
 
-\subsubsection{Scratch}
+Traditional approaches result in a sparse representation of the knowledge base with the feature dimensionality equal to the corpus's vocabulary size (the vocabulary can also contain n-grams or character n-grams if it is advantageous).
+Therefore, it can be considered a weighting scheme, assigning "importance" to each word present in the document. 
+% Neural approaches in this paper produce a dense representation -- a fixed-size vector of real numbers, inherently hard to interpret.
 
-As mentioned above, when dealing with natural language processing, we can approach the task in two different ways, both described in detail by \cite{two-tower}. 
+Neural approaches in this paper generate a fixed-length real-valued vector representation for both the query and all the documents in the knowledge base.
+The dense representation is inherently hard to interpret, and the meaning can be derived only from the relative position of different documents' representations (vectors).
+Hence the $f(q,d)$ score from Equation \ref{eq:formal_descr_dr} is the distance between the vector representations of $q$ and $d$.
+The distance metric used may be cosine similarity, dot product, or some fast approximation such as FAISS \citep{faiss}.
+This approach allows us to preprocess the whole knowledge base, allowing us to compute only the query representation during runtime.
+The disadvantage is that we do not utilize the attention mechanism to consider each query-document relation individually and, today less relevant problem, the need for additional space to store the precomputed representation.
 
-The first is to have the document-query pair $(d,q)$ on the input of the neural model (cross-attention model).
-One of the benefits is the direct usage of the neural model on the downstream tasks, possibly granting better performance.
-
-The second approach is to preprocess the whole database of documents by the model and then using some metric for choosing the documents related to the query based on the computed representation.
-The obvious advantage is the offline preprocessing and thus improved performance during inference.
-Only the unseen query has to be processed by the neural model followed by computing the metric between the documents' representation and the query representation.
-This is usually way faster than using a neural model for every document and can also be significantly speedup \citep{faiss}.
-The obvious disadvantage is the need for additional space to store the precomputed representation.
-
-We will be using the second approach as our computational resources are limited.
-
-Traditional approaches will result in sparse representation with the feature dimension size equal typically to the corpus's vocabulary size (the vocabulary can also contain n-grams or character n-grams if it is advantageous).
-Therefore, it can be considered a weighting scheme, assigning "importance" to each word if it was present in the document. 
-Neural approaches used in this paper produce a dense representation, as described by \citet{two-tower}.
-It is usually a fixed-size vector of real numbers, inherently hard to interpret.
-The meaning can be derived only from the relative position of different documents' indexes (vectors).
-
-Neural models can also be used directly as the scoring function as in Section \ref{sec:formal_descr_dr}.
+Neural models can also be used directly as the scoring function as in Equation \ref{eq:formal_descr_dr} and use the document-query pair $(d,q)$ as their input (the cross-attention model).
 This can, according to \citet{two-tower}, lead to better performance. However, since the query is provided at runtime, the evaluation cannot be precomputed and has to run for every document each time we enter a new query.
-This is currently infeasible for usage on whole corpora but can be utilized by running on a smaller subset of the corpus (so-called reranking), typically pre-selected by a non-neural model, creating a hybrid approach.
+Because of that, and because of the large number of documents in the knowledge base, this approach is unfit for real-world application.
 
-% TODO two-tower paper, 
-In order to solve the document retrieval task, we will focus on finding an appropriate function $f$.
-In this thesis, that means a function suitable for long documents.
+There exists a hybrid approach capable of utilizing the cross-attention model. 
+It runs the model on a small subset of the corpus, typically pre-selected by a non-neural model.
+The model only reranks the gathered sentences.
+Our colleague \citet{dedkova} provides a detailed look into the use of such methods in Czech document retrieval.
 
-% TODO toto je prilis pekne napisane aby bolo vyhodene
-In 2018, BERT \citep{bert} the now well-established NLP model was introduced. The model is pre-trained using the masked language modeling task and the next sentence prediction task.
-The defining feature of BERT is its self-attention mechanism, which attends to the whole input at once and transforms input tokens based on full context, both left and right to the token.
-Since the "each versus each" approach is employed, this mechanism naturally introduces $O(N^2)$ time complexity, which acts as a bottleneck in applications, where a longer input is required.
-Since its introduction, there have been many well-performing models based on BERT (this movement is sometimes referred to as "BERTology").
-In this thesis, we will focus on models which use similar architecture and modify the attention mechanism in order to be able to compute long inputs.
-% used usually for GLUE benchmark which is not???? for document retrieval
-% TODO maybe include attention formula
+% i did not mention it
+%As mentioned above, when dealing with natural language processing, we can approach the task in two different ways, both described in detail by \cite{two-tower}. 
+
+%USED ABOVE
+%The first is to have the document-query pair $(d,q)$ on the input of the neural model (cross-attention model).
+%One of the benefits is the direct usage of the neural model on the downstream tasks, possibly granting better performance.
+
+%USED ABOVE
+%The second approach generates a fixed-length real-valued vector representation for both the query and all the documents in the knowledge base.
+%Then the $f(q,d)$ score is the distance between $q$'s and $d$'s representation.
+%The distance metric used may be cosine similarity, dot product, or some approximation such as FAISS \citep{faiss}.
+
+%BLAH SOUNDS TOO SIMPLE The second approach is to preprocess the whole database of documents by the model and then using some metric for choosing the documents related to the query based on the computed representation.
+%The obvious advantage is the offline preprocessing and thus improved performance during inference.
+%Only the unseen query has to be processed by the neural model followed by computing the metric between the documents' representation and the query representation.
+%This approach grants significant speedup compared to computing the score for every query-document pair. 
+
+%USED ABOVE
+%We will be using the second approach since the number of documents in our knowledge base renders the cross-attention paradigm computationally unfit for real-world application.
+% TODO vymazat, 
+%In order to solve the document retrieval task, we will focus on finding an appropriate function $f$.
+%In this thesis, that means a function suitable for long documents.
+
+\subsubsection{Generating Representations}
+
+Generating the dense representations, also called embeddings since we project the input into a vector space with a specific dimension, is, in general, a well-studied area of research. We restrict ourselves to neural methods described in Section \ref{sec:neural_approaches}. 
+
+There are multiple ways to generate the input's embedding from the model-processed tokens.
+Sentence-BERT \citep{sbert} adds a pooling layer, either \texttt{MAX} or \texttt{MEAN}, and fine-tunes the model using two different approaches, depending on the task.
+For regression tasks, TODO.
+They compare their method against averaging all the output tokens' representations, selecting the out representation of special input token \texttt{[CLS]} situated at the front of the input, and against averaging input tokens' GloVe \citep{glove} word vectors.
+The authors note that if the fine-tuning step is not performed, the BERT model provides little to no improvement to averaging input tokens' word vectors.
+
+The authors of \citep{two-tower} proposed a different approach designed directly for the task of document retrieval, in their case, over Wikipedia articles. 
+They apply a fully-connected linear layer to the \texttt{[CLS]} token's representation and also pre-train the BERT model on three additional document retrieval tasks:
+\begin{itemize}
+        \item \textbf{Inverse Cloze Task (ICT)} - Training the model to embed sentences close to the paragraph from which they were selected. The selected sentences are omitted from the paragraph in the training step.
+        \item \textbf{Body First Selection (BFS)} - Training the model to embed sentences close to the paragraphs in the same article. The sentences are selected in such a manner to reasonably expect this task to succeed. In the case of training on Wikipedia, the sentences are selected from the first paragraph (summary).
+        \item \textbf{Wiki Link Prediction (WLP)} - Training the model to embed sentences close to Wikipedia articles from which there exists a hyperlink to the article of the sentence.
+\end{itemize}
+The authors reported significant improvements compared to using only MLM for the pre-training phase.
+% USED ABOVE They use the model's final representation of the special input token \verb{[CLS]}, situated at the front of the input, as the representation of the whole input. 
+
+\subsection{Czech Language}
+
+TODO
+%The introduced BERT-based models are seldom trained on Czech data.
+
+\subsection{Distillation}
+
+TODO
