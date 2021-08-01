@@ -191,7 +191,7 @@ The projections are computed using trainable matrices $W_Q$, $W_K$, and $W_V$, p
 The result is normalized by the inverse factor of the square root of the projection dimension. 
 Then softmax is applied, and the result is used as the weights for the weighted average of all value vectors. To put it into an equation: 
 \begin{equation}
-  \text{Attention}(Q,K,V) = \text{softmax}(\frac{QK^T}{\sqrt{d}})V\ .
+  \text{Attention}(Q,K,V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d}}\right)V\ .
   \label{eq:attention}
 \end{equation}
 Therefore, for every token, the result is the weighted average of all the value vectors, based on the similarity between the queries and the keys. 
@@ -314,7 +314,7 @@ Since cosine-similar vectors produce the highest values of dot products, we can 
 
 In order to reduce the memory complexity, the Reformer model applies three methods.
 The first one is the use of RevNets \citep{revnets} discarding the need for storing layers' activations (Figure \ref{fig:revnets}). The second one is the use of ``chunking'' -- feeding only ``chunks'' of input at a time through the linear layers.
-The last one is the swapping of the parameters of currently unused layer from GPU to CPU. This would not be efficient in normal transformers, but since Reformer is able to work with inputs even 16,000 tokens long, the authors claim that ``the amount of compute done with the parameters amortizes the cost of their transfer.''
+The last one is the swapping of the parameters of the currently unused layer from GPU to CPU. This would not be efficient in normal transformers, but since Reformer is able to work with inputs even 64,000 tokens long, the authors claim that ``the amount of compute done with the parameters amortizes the cost of their transfer.''
 
 \begin{figure}[!htb]
         \centering
@@ -350,7 +350,51 @@ The parameter $m$ does depend on the L2-norm of the queries and keys, the dimens
 
 \subsubsection{\nystr{}}
 
-\nystr{} \citep{nystrom} uses ``smart'' Moore-Penrose inverse approximation. Instead of full $Q$ and $K$ matrices, only segment-means are used, and then the Moore-Penrose inverse is calculated using an iterative algorithm.
+Nystr\"omformer's \citep{nystrom} base idea is to approximate the attention computation by subsampling the original $Q$ and $K$ matrices and using Nystr\"om-based method to approximate the full attention. 
+The subsampling is done by splitting the $Q$ and $K$ matrices into equal parts and then averaging each part into single vectors, calling them landmarks.
+
+The full attention matrix can be written as
+\begin{equation}
+        \text{Attention}(Q,K,V)=\text{softmax}\left(\frac{QK^T}{\sqrt{d}}\right)=
+        \begin{bmatrix}
+                A_S && B_S \\
+                F_S && C_S
+        \end{bmatrix}\ ,
+\end{equation}
+where $A_S\in\R^{m\times m}$ and other matrices are of appropriate shapes, with $m$ being the number of samples (landmarks). 
+One could approximate the attention by expressing the matrix $C_S$ using the other matrices: $C_S=F_SA_S^+B_S$. The $+$ sign indicates the Moore-Penrose inverse.
+
+Such usage of Nyst\"om approximation will not help, as the samples can only be obtained after the attention matrix is computed -- the softmax operation needs the whole matrix $QK^T$ (or at least its rows) to be complete. 
+Nevertheless, the authors do compute softmax over only the subsampled parts of the $QK^T$ matrix and use the resulting softmax-ed matrices to compute the approximated attention.
+The final approximated attention is obtained by 
+\begin{equation}
+        \widehat{\text{Attention}}(Q,K,V)=
+        \text{softmax}\left(\frac{Q\tilde{K}^T}{\sqrt{d}}\right)
+        \text{softmax}\left(\frac{\tilde{Q}\tilde{K}^T}{\sqrt{d}}\right)^+
+        \text{softmax}\left(\frac{\tilde{Q}K^T}{\sqrt{d}}\right)\ ,
+\end{equation}
+where $\sim$ indicates a sumbsampled matrix.
+
+The only theoretical guarantee presented directly in the paper is that if the landmarks are equal to the original keys and queries, then the approximation converges to the true attention. 
+However, this holds trivially.
+Proper theoretical guarantees are located in the appended repository\footnote{\url{https://github.com/mlpen/Nystromformer/}}.
+There, the difference between true attention and the approximation is bounded by:
+\begin{equation}
+        ||\text{Attn}-\widehat{\text{Attn}}||_\infty\leq(1+||A^+_S||_\infty+||A^+_S-Z^*||_\infty)||V||_\infty\ ,
+\end{equation}
+where $||\cdot||_\infty$ is the maximum absolute column sum and $Z^*$ is the result of the iterative algorithm used by the authors to compute the Moore-Penrose inverse.
+Figure \ref{fig:nystrom_example} depicts anecdotal comparison between full self-attention and the approximated attention.
+
+\begin{figure}[!htb]
+        \centering
+        \includegraphics{nystrom_example.pdf}
+        \caption[\nystr{} Attention Example]{Comparision of the true attention and Nystr\"om approximation. Reprinted from \citep{nystrom}.}
+        \label{fig:nystrom_example}
+\end{figure}
+
+The authors note that thanks to the theoretical results from \citep{nystr-2017} and \citep{linformer}, even a small number of landmarks suffices to provide a good approximation.
+The first paper states that the error of Nystr\"om approximation decreases with the matrix's rank.
+In the second paper, the authors suggest that the attention mechanism produces low-rank matrices.  
 
 \subsubsection{ColBERT}
 
