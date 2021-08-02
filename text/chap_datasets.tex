@@ -22,7 +22,8 @@ More complex claims were created by providing related Wikipedia articles (articl
 In the second step - annotation - the annotators were asked to label the generated claims and provide suggested evidence when needed.
 The whole process was streamlined to not spend longer than five minutes on a single claim throughout all stages.
 
-The quality of the dataset was throughoutly tested in the paper.
+The quality of the dataset was thoroughly tested in the paper.
+We have, however, noticed an unaddressed issue described in Section \ref{subsec:data_leakage}.
 One of the methods for improving the dataset was annotating the generated claim by multiple people to reduce mislabeling.
 
 \subsection{FEVER CS}
@@ -137,9 +138,10 @@ As of writing, this figure is not final as the dataset needs to be manually clea
 The claim mutation in FEVER and \CTK{} datasets can be a source of unintentional cues, which the model can use to "guess" the label without understanding the claim.
 For example, \citet{fever} pointed out that their annotators had difficulties negating the claims beyond trivial negations.
 
-\citet{rypar} conducted a series of evaluations on the \CTK{} and FEVER CS datasets using dataset-weighted cue information (DCI) and cue productivity and coverage \citep{niven-probing}, inspired by \citet{derczynski-etal-2020-maintaining}. 
+\citet{rypar} conducted a series of evaluations on the \CTK{} and FEVER CS datasets using dataset-weighted cue information (DCI), and cue productivity and coverage \citep{niven-probing}, inspired by \citet{derczynski-etal-2020-maintaining}.
 The results concluded that the original FEVER dataset contained simple negative clues, which were also present in FEVER CS, although with limited impact only. No significant bias was confirmed, but the current size of the \CTK{} dataset allows for thematic clusters which impact the dataset more than they should. 
 
 \subsection{Data Leakage}
+\label{subsec:data_leakage}
 
 As pointed out by \citet{ullrich}, the original FEVER dataset CONTAINS a not addressed quality -- at least 80 \% of verifiable dev claims share an evidence-set document with some train claim. The effects of this "leakage" are unknown and call for further research.

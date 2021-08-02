@@ -29,15 +29,15 @@ As mentioned above, this definition also fits descriptions of a range of other t
 
 \section{Approaches to Document Retrieval}
 
-The organizators of \textbf{T}ext \textbf{Re}trieval \textbf{C}onference (TREC) \citep{trec-2020} classify retrieval methods into three categories (with examples):
+The organizers of the \textbf{T}ext \textbf{Re}trieval \textbf{C}onference (TREC) \citep{trec-2020} classify retrieval methods into three categories (with examples):
 \begin{itemize}
         \item Traditional -- TFIDF, BM25
         \item Neural Networks using Language Modeling (NNLM) -- BERT-based
         \item Neural Networks -- others
 \end{itemize}
 We explore NNLM and traditional approaches, emphasizing the NNLM approach while using the latter as the baseline.
-``Neural Networks'' is reserved for methods that use neural networks only in some parts of its implementation (such as word embeddings) and do not rely explicitly on language modeling.
-We do not explore such methods in this thesis, and therefore, by neural approach, we refer to NNLM methods
+The term ``Neural Networks'' is reserved for methods that use neural networks only in some parts of its implementation (such as word embeddings) and do not rely explicitly on language modeling.
+We do not explore such methods in this thesis, and therefore, by neural approach, we refer to the NNLM methods.
 While both work on entirely different principles, we will use both to generate an indexed version of the knowledge scope.
 
 This chapter further introduces the most common document retrieval methods and new models with great potential while explaining the main points of the theoretical background.
@@ -87,7 +87,7 @@ TFIDF is called a weighting scheme precisely for this reason.
 
 Since % term frequency and therefore tfidf is zero when 
 $$t\notin d \hspace{1mm}\Rightarrow\hspace{1mm} \text{tf}(t, d) = 0 \hspace{1mm}\Rightarrow\hspace{1mm} \text{tfidf}(t, d, D) = 0\ ,$$
-we know that only words in the corpus' vocabulary are important, and thus we can precompute the TFIDF values for each document, and word from the corpus' vocabulary.
+we know that only words in the corpus' vocabulary are important, and thus we can precompute the TFIDF values for each document and word from the corpus' vocabulary.
 We obtain $|D|\times {vocabulary\_size}$ matrix $V$ of TFIDF values.
 %This formula can be improved -- in this form, it favors longer queries $q$. % DOES IT? TODO
 %We can also precompute the TFIDF values for each document and vocabulary word in the corpus.
@@ -150,7 +150,7 @@ On the other hand, TFIDF is, to this day, a very well-performing low-computation
 Neural approaches using language modeling are models trained on predicting the correct word given some text before.  % maximizing the likelihood of correct word prediction in a text. 
 % More precisely, it is a conditional language modeling since the prediction also depends on provided input.
 Recurrent neural network (RNN) architecture was traditionally used for this task.
-The RNN was fed encoded tokenized input, returning a hidden state which was next fed into the RNN again along with the next input token.
+The RNN was fed encoded tokenized input, returning a hidden state that was next fed into the RNN again along with the next input token's representation.
 % The RNN was fed encoded tokenized input, and the RNN predicted the next token as depicted in Figure \ref{fig:lec6_slide23}.
 Its hidden states could also be used to encode the input into a fixed-length vector representation, which can be further used to either classify the input or use another RNN (decoder) to generate another sequence.
 Intuitively, the vector contains the meaning of the original input. 
@@ -169,7 +169,7 @@ The attention mechanism is in-depth described in subsection \ref{subsec:attentio
         \label{fig:transformer}
 \end{figure}
 
-The research paper ``Attention Is All You Need'' by \citet{attention-is-all-you-need} improved the RNN-based seq2seq by introducing the transformer architecture, depicted in Figure \ref{fig:transformer}, by substituting the RNN by multiple ``encoder blocks'', that is, attention layer and feedforward network with skip-connection. 
+The research paper ``Attention Is All You Need'' by \citet{attention-is-all-you-need} improved the RNN-based seq2seq by introducing the transformer architecture, depicted in Figure \ref{fig:transformer}, by substituting the RNN with multiple ``encoder blocks'', that is, attention layer and feedforward network with skip-connection. 
 This resulted in simpler architecture (RNN architectures tend to become very complex when trying to avoid the vanishing gradient problem), parallelization of the computation, and, most importantly, an improved performance. 
 The improvement showed that the attention mechanism was crucial to the past achievements of the seq2seq models, hence the paper's name.
 %On the other hand, the attention mechanism also introduces quadratic time complexity, which acts as a bottleneck in applications, where a longer input is required.
@@ -232,7 +232,7 @@ The intuition is that different heads might learn to attend to different pattern
 	\begin{minipage}{.49\textwidth}
 		\centering
 		\includegraphics[width=\linewidth]{self_attention_visualization.png}
-                \caption[Attention Values Visualization]{Self-attention mechanism example, where the token for word ``it'' is paying attention to ``the animal'', effectively being substituted for it. The orange color represnts the values from $QK^T$. Reprinted from \citep{illustrated-transformer}.}
+                \caption[Attention Values Visualization]{Self-attention mechanism example, where the token for the word ``it'' is paying attention to ``the animal'', effectively being substituted for it. The orange color represents the values from $QK^T$. Reprinted from \citep{illustrated-transformer}.}
                 \label{fig:self-attn}
 	\end{minipage}
 \end{figure}
@@ -265,7 +265,7 @@ Intuitively, the pre-training ``teaches'' the language and word meanings while t
 
 \subsection{Transformer's Computational Limits}
 
-While the benefits of the attention mechanism are undeniable \citep{attention-is-all-you-need}, on the other hand, it introduces quadratic time and space complexity by employing the ``one on one'' approach coupled with the non-linear softmax operation, which prevents various optimization techniques to be applied.
+While the benefits of the attention mechanism are undeniable \citep{attention-is-all-you-need}, on the other hand, it introduces quadratic time and space complexity by employing the ``one on one'' approach coupled with the non-linear softmax operation, which prevents various optimization techniques from being applied.
 That is why the attention mechanism acts as a bottleneck in applications, where a longer input is required.
 Transformer models, therefore, generally have the input length fixed to 512 tokens (shorter inputs are padded, longer truncated).
 That might be adequate for most applications, but in document retrieval, valuable information might get lost.
@@ -312,7 +312,7 @@ Since the output of $QK^T$ represents the dot products between the rows of $Q$ a
 The problem of finding the closest vectors is still in $\bigO(n^2)$ since we need to compute the cosine distance between all the vector pairs -- we would need to compute $QK^T$ nonetheless. %??? TODO check grammar
 Here the authors utilize LSH for finding the closest vectors.
 Hash function $h(x)$ is locality-sensitive if it maps nearby vectors to the same hash with high probability. 
-The simplified base idea is that under random linear projections (randomly initialized matrix) into $n_{buckets}$ dimensional space, nearby vectors preserve their orientation, thus sharing the index of the dimension where they show the highest values.
+The simplified base idea is that under random linear projections (randomly initialized matrix) into $n_{buckets}$ dimensional space, nearby vectors preserve their orientation, thus sharing the dimension index where they show the highest values.
 Multiple random projections are performed in parallel to reduce the probability of similar vectors differing in the maximal indices.
 After the LSH computation is finished, each vector has been assigned to a ``bucket''.
 Then the matrix $Q$ is sorted so that vectors from the same buckets are in a sequence.
@@ -320,7 +320,7 @@ What follows is the computation of full attention, but only on parts of the sort
 The parts are selected so that each bucket attends to all of the vectors in the bucket and one previous bucket, see Figure \ref{fig:reformer_buckets}.
 The authors also noted that setting $Q=K$ did not negatively impact the model's performance, and therefore LSH is applied only to the matrix $Q$.
 
-Another way to look at the LSH bucketing is to compute the dot product of the input vectors with a sequence of $\dfrac{n_{buckets}}{2}$ random vectors followed by their negative counterparts, of the same dimension as the input vectors.
+Another way to look at the LSH bucketing is to compute the dot product of the input vectors with a sequence of $\dfrac{n_{buckets}}{2}$ random vectors followed by their negative counterparts of the same dimension as the input vectors.
 Since cosine-similar vectors produce the highest values of dot products, we can be confident that vectors are similar if they shared the highest dot product values with the same random vectors even after multiple rounds of these projections.
 
 \begin{figure}[!htb]
@@ -349,7 +349,7 @@ Performer model \citep{performer} looks at the self-attention mechanism, concret
 \end{equation}
 where K is a kernel function $K\colon\R^d\times\R^d\rightarrow\R$ defined for a feature map $\phi\colon\R^d\rightarrow\R^r$.
 The authors approximate the attention by using the randomized feature map to define matrices $Q', K'\in\R^{n\times r}$, with the rows equal to $\phi(q_i^T)^T$ and $\phi(k_i^T)^T$, respectively.
-Then, by calculating in the paranthesized order
+Then, by calculating in the parenthesized order
 \begin{equation}
         AV = (Q'(K'V))
 \end{equation}
@@ -367,8 +367,8 @@ The parameter $m$ does depend on the L2-norm of the queries and keys, the dimens
 
 \subsubsection{\nystr{}}
 
-Nystr\"omformer's \citep{nystrom} base idea is to approximate the attention computation by subsampling the original $Q$ and $K$ matrices and using Nystr\"om-based method to approximate the full attention. 
-The subsampling is done by splitting the $Q$ and $K$ matrices into equal parts and then averaging each part into single vectors, calling them landmarks.
+Nystr\"omformer's \citep{nystrom} base idea is to approximate the attention computation by subsampling the original $Q$ and $K$ matrices and using a Nystr\"om-based method to approximate the full attention. 
+The subsampling is done by splitting the $Q$ and $K$ matrices into equally sized segments and then averaging each part into single vectors, calling them landmarks.
 
 The full attention matrix can be written as
 \begin{equation}
@@ -381,7 +381,7 @@ The full attention matrix can be written as
 where $A_S\in\R^{m\times m}$ and other matrices are of appropriate shapes, with $m$ being the number of samples (landmarks). 
 One could approximate the attention by expressing the matrix $C_S$ using the other matrices: $C_S=F_SA_S^+B_S$. The $+$ sign indicates the Moore-Penrose inverse.
 
-Such usage of Nystr\"om approximation will not help, as the samples can only be obtained after the attention matrix is computed -- the softmax operation needs the whole matrix $QK^T$ (or at least its rows) to be complete. 
+Such usage of the Nystr\"om approximation will not help, as the samples can only be obtained after the attention matrix is computed -- the softmax operation needs the whole matrix $QK^T$ (or at least its rows) to be complete. 
 Nevertheless, the authors do compute softmax over only the subsampled parts of the $QK^T$ matrix and use the resulting softmax-ed matrices to compute the approximated attention.
 The final approximated attention is obtained by 
 \begin{equation}
@@ -405,10 +405,10 @@ There, the difference between true attention and the approximation is bounded by
 \begin{equation}
         ||\text{Attn}-\widehat{\text{Attn}}||_\infty\leq(1+||A^+_S||_\infty+||A^+_S-Z^*||_\infty)||V||_\infty\ ,
 \end{equation}
-where $||\cdot||_\infty$ is the maximum absolute column sum and $Z^*$ is the result of the GPU-compatible iterative algorithm \citep{iterative-moore} used by the authors to compute the Moore-Penrose inverse.
+where $||\cdot||_\infty$ is the maximum absolute column sum, and $Z^*$ is the result of the GPU-compatible iterative algorithm \citep{iterative-moore} used by the authors to compute the Moore-Penrose inverse.
 The authors report good results on various tasks, even though the softmax operation is performed on submatrices only. 
 The adverse effects might be reduced by the fact that landmarks are calculated as segment means, and therefore, the original information is present during the softmax step.
-Figure \ref{fig:nystrom_example} provides anecdotal comparison between full self-attention and the approximated attention.
+Figure \ref{fig:nystrom_example} provides an anecdotal comparison between full self-attention and the approximated attention.
 
 \begin{figure}[!htb]
         \centering
@@ -418,7 +418,7 @@ Figure \ref{fig:nystrom_example} provides anecdotal comparison between full self
 \end{figure}
 
 The authors note that thanks to the theoretical results from \citep{nystr-2017} and \citep{linformer}, even a small number of landmarks suffices to provide a good approximation.
-The first paper states that the error of Nystr\"om approximation decreases with the matrix's rank.
+The first paper states that the error of the Nystr\"om approximation decreases with the matrix's rank.
 In the second paper, the authors suggest that the attention mechanism produces low-rank matrices.  
 
 \subsection{Encoder Utilization in Document Retrieval}
@@ -432,7 +432,7 @@ Therefore, it can be considered a weighting scheme, assigning "importance" to ea
 Neural approaches in this paper generate a fixed-length real-valued vector representation for both the query and all the documents in the knowledge base.
 The dense representation is inherently hard to interpret, and the meaning can be derived only from the relative position of different documents' representations (vectors).
 Hence the $f(q,d)$ score from Equation \ref{eq:formal_descr_dr} is the distance between the vector representations of $q$ and $d$.
-The distance metric used may be cosine similarity, dot product, or some fast approximation such as FAISS \citep{faiss}.
+The distance metric used may be cosine similarity, dot product, or fast approximation such as FAISS \citep{faiss}.
 This approach allows us to preprocess the whole knowledge base, allowing us to compute only the query representation during runtime.
 The disadvantage is that we do not utilize the attention mechanism to consider each query-document relation individually and, today less relevant problem, the need for additional space to store the precomputed representation.
 
@@ -478,7 +478,7 @@ For regression tasks, TODO.
 They compare their method against averaging all the output tokens' representations, selecting the out representation of special input token \texttt{[CLS]} situated at the front of the input, and against averaging input tokens' GloVe \citep{glove} word vectors.
 The authors note that if the fine-tuning step is not performed, the BERT model provides little to no improvement to averaging input tokens' word vectors.
 
-The authors of \citep{two-tower} proposed a different approach, designed directly for the task of document retrieval, in their case, over Wikipedia articles. 
+The authors of \citep{two-tower} proposed a different approach, designed directly for document retrieval, in their case, over Wikipedia articles. 
 They apply a fully-connected linear layer to the \texttt{[CLS]} token's representation and also pre-train the BERT model on three additional document retrieval tasks:
 \begin{itemize}
         \item \textbf{Inverse Cloze Task (ICT)} - Training the model to embed sentences close to the paragraph from which they were selected. The selected sentences are omitted from the paragraph in the training step.
