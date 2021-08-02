@@ -6,7 +6,7 @@ However, with many laypeople connected to the internet, extensive and aggressive
 The information overload created by these agents results in an 'opaque' state of the internet, where relevant, accurate information is hard to find in the mass of similarly sounding, non-professional written sources.
 Manually fact-checking the claims, therefore, becomes very expensive and time-consuming - bordering with unfeasible.
 Nevertheless, multiple projects focused on fact-checking emerged. 
-Various platforms such as Instagram and Twitter incorporated fact-checking mechanisms, mainly on viral or politicians' posts. 
+Various platforms such as Instagram\footnote{\url{https://about.fb.com/news/2018/05/hard-questions-false-news/}} and Twitter\footnote{\url{https://blog.twitter.com/en_us/topics/product/2021/introducing-birdwatch-a-community-based-approach-to-misinformation}} incorporated fact-checking mechanisms, mainly on viral or politicians' posts. 
 
 In Czechia and the Slovak Republic, a popular project is Demagog\footnote{\url{https://demagog.cz}}, whose goal is to verify politicians' claims.
 The claim verification is carried out manually using primary sources. 
@@ -27,6 +27,15 @@ The potential ability of adversaries to flood the internet with fake news articl
 Automatic fact-checking should not be thought of as the miracle cure to the fake news problem, which is much more complex and deserves a society-wide approach.
 
 \section*{Related Work}
+TODO delete or something
+
+\section*{AI in Journalism}
+
+This thesis is one of the multiple theses written by the fact-checking team at ČVUT, led by Ing. Jan Drchal, Ph.D., as part of the AI in Journalism project, supported by the Transformation of Journalisms Ethics in the Advent of Artificial Intelligence (TL02000288)\footnote{\url{https://starfos.tacr.cz/cs/project/TL02000288}} grant from the Technology Agency of the Czech Republic.
+Our team focuses on creating a Czech fact-checking dataset from the ground up and developing usable Czech models for the fact-checking task, inspired by FEVER \citep{fever} and \citet{danish_fever}.
+The dataset is based on Czech news articles provided in cooperation with the Czech News Agency\footnote{Česká Tlačová Agentúra (ČTK)} -- we refer to the completed dataset as the ČTK dataset. 
+Our colleague \citet{ullrich} describes the creation of the ČTK dataset, which consisted of building a Czech annotation platform, working with annotators (students of the Faculty of Social Sciences at Charles University, one of our partners), and analyzing and cleaning up the gathered data.
+The works from colleagues \citet{dedkova} and \citet{rypar} deal with various aspects of document retrieval -- the use of hybrid (multi-stage) models and the performance of different embedding paradigms, respectively.
 
 \section*{Transformer Models}
 
@@ -36,14 +45,6 @@ The input of BERT is thus limited to 512 tokens as a design choice.
 Working with this restriction, we decided to split the \CTK{} articles into paragraphs and perform document retrieval on them, theoretically losing joint article meaning.
 
 In this thesis, we explore this practice and compare it to BERT-based models with altered attention mechanisms such as \nystr{} \citep{nystrom}, Longformer \citep{longformer} and Reformer \citep{reformer}, allowing for longer inputs without increasing the computation cost, compromising in other areas.
-
-\section*{AI in Journalism}
-
-This thesis is one of the multiple theses written by the fact-checking team at ČVUT, led by Ing. Jan Drchal, Ph.D., as part of the AI in Journalism project, supported by the Transformation of Journalisms Ethics in the Advent of Artificial Intelligence (TL02000288)\footnote{\url{https://starfos.tacr.cz/cs/project/TL02000288}} grant from the Technology Agency of the Czech Republic.
-Our team focuses on creating a Czech fact-checking dataset from the ground up and developing usable Czech models for the fact-checking task, inspired by FEVER \citep{fever} and \citet{danish_fever}.
-The dataset is based on Czech news articles provided in cooperation with the Czech News Agency\footnote{Česká Tlačová Agentúra (ČTK)} -- we refer to the completed dataset as the ČTK dataset. 
-Our colleague \citet{ullrich} describes the creation of the ČTK dataset, which consisted of building a Czech annotation platform, working with annotators (students of the Faculty of Social Sciences at Charles University, one of our partners), and analyzing and cleaning up the gathered data.
-The works from colleagues \citet{dedkova} and \citet{rypar} deal with various aspects of document retrieval -- the use of hybrid (multi-stage) models and the performance of different embedding paradigms, respectively.
 
 \section*{Thesis Outline}
 
