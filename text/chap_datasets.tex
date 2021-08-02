@@ -94,7 +94,7 @@ It was designed to be used by layman annotators, who were students of our partne
 \end{table}
 
 The dataset creation consisted of two harvests. 
-After reviewing the results of the first one, we were able to rewrite instructions in the tool to guide the annotators to create higher-quality mutations and labels with fewer conflicts.
+After reviewing the results of the first one, we were able to rewrite instructions in the tool to guide the annotators to create higher-quality claims and labels with fewer conflicts.
 The second harvest concluded with $\approx$ 3,500 labeled claims, with more than half being labeled two or more times. %TODO cite webpage
 As of writing, this figure is not final as the dataset needs to be manually cleaned and have conflicts resolved. 
 
@@ -130,14 +130,14 @@ As of writing, this figure is not final as the dataset needs to be manually clea
   \includegraphics[width=\textwidth]{dashboard.pdf}
   \caption[Visualizations of Properties of the Collected Dataset]{Visualizations of various properties of the collected \CTK{} dataset. Figure reprinted from \citet{ullrich}.}
   \label{fig:dashboard}
-  \end{figure}
+\end{figure}
 
 \section{Data Quality}
 
 The claim mutation in FEVER and \CTK{} datasets can be a source of unintentional cues, which the model can use to "guess" the label without understanding the claim.
 For example, \citet{fever} pointed out that their annotators had difficulties negating the claims beyond trivial negations.
 
-\citet{rypar} conducted a series of evaluations on the \CTK{} and FEVER CS datasets using dataset-weighted cue information (DCI), and cue productivity and coverage \citep{niven-probing}, inpsired by \citet{derczynski-etal-2020-maintaining}. 
+\citet{rypar} conducted a series of evaluations on the \CTK{} and FEVER CS datasets using dataset-weighted cue information (DCI) and cue productivity and coverage \citep{niven-probing}, inspired by \citet{derczynski-etal-2020-maintaining}. 
 The results concluded that the original FEVER dataset contained simple negative clues, which were also present in FEVER CS, although with limited impact only. No significant bias was confirmed, but the current size of the \CTK{} dataset allows for thematic clusters which impact the dataset more than they should. 
 
 \subsection{Data Leakage}
