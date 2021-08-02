@@ -9,6 +9,12 @@ In this case, the database of documents is all the accessible web pages on the i
 
 For our uses, the query is the claim to be fact-checked, and the document database is a collection of relevant documents, which we call knowledge base. 
 
+In this chapter, we define the task of document retrieval and introduce traditional and novel (neural) approaches to solving it.
+After describing the traditional word-weighting approaches, we examine crucial concepts behind the used neural models.
+We then describe the framework which allows us to use the neural models on the document retrieval task.
+We then propose a way of applying the models to the document retrieval task.
+TODO -- remove one of the two previous sentences.
+
 \section{Formal Description}
 \label{sec:formal_descr_dr}
 The task can be formally described \citep{two-tower} using a scoring function (sometimes referred to as ranking function) %article before ranking maybe
@@ -29,7 +35,9 @@ The organizators of \textbf{T}ext \textbf{Re}trieval \textbf{C}onference (TREC) 
         \item Neural Networks using Language Modeling (NNLM) -- BERT-based
         \item Neural Networks -- others
 \end{itemize}
-We explore NNLM and traditional approaches, emphasizing the NNLM approach while using the other as the baseline. ``Neural Networks'' is reserved for methods that use neural networks only in some parts of its implementation (such as word embeddings) and do not rely explicitly on language modeling. We do not explore such methods in this thesis, and therefore, by neural approach, we refer to NNLM methods
+We explore NNLM and traditional approaches, emphasizing the NNLM approach while using the latter as the baseline.
+``Neural Networks'' is reserved for methods that use neural networks only in some parts of its implementation (such as word embeddings) and do not rely explicitly on language modeling.
+We do not explore such methods in this thesis, and therefore, by neural approach, we refer to NNLM methods
 While both work on entirely different principles, we will use both to generate an indexed version of the knowledge scope.
 
 This chapter further introduces the most common document retrieval methods and new models with great potential while explaining the main points of the theoretical background.
@@ -47,12 +55,15 @@ This simple metric is called term frequency (TF).
 TF can be ineffective if some of the terms in the query are very common in the document database.
 This issue is resolved by introducing inverse document frequency, which informs how common the term is across all the documents.
 The base version of IDF:
-$$\text{idf}(t, D)=\log{\frac{\abs{D}}{\abs{\{d\in D: t\in d\}}}}\ .$$
+\begin{equation}
+        \text{idf}(t, D)=\log{\frac{\abs{D}}{\abs{\{d\in D: t\in d\}}}}\ .
+\end{equation}
 
 % If we combine these two metrics
 Multiplying these two metrics, we get the TFIDF weight of term $t$ in document $d$ in document database $D$:
-%which is calculated simply as
-$$\text{tfidf}(t,d,D)=\text{tf}(t,d)\cdot\text{idf}(t,D)\ .$$
+\begin{equation}
+        \text{tfidf}(t,d,D)=\text{tf}(t,d)\cdot\text{idf}(t,D)\ .
+\end{equation}
 
 \begin{figure}[!htb]
 	\centering
@@ -69,9 +80,9 @@ $$\text{tfidf}(t,d,D)=\text{tf}(t,d)\cdot\text{idf}(t,D)\ .$$
 
 We have explained how to compute a term's weight (``importance'') for a specific document.
 The intuitive formula for query score $f(q, d)$ is then
-$$
-f_D(q, d)\approx\sum_{t \in q}\text{tfidf}(t, d, D)\ .
-$$
+\begin{equation}
+        f_D(q, d)\approx\sum_{t \in q}\text{tfidf}(t, d, D)\ .
+\end{equation}
 TFIDF is called a weighting scheme precisely for this reason.
 
 Since % term frequency and therefore tfidf is zero when 
@@ -86,9 +97,9 @@ This step removes the need for normalization in the TFIDF formula, and we may us
 To get the relevance of each document to the query $q$, that is $f_D(q, d)$, we first represent the query $q$ as a bag of words vector (BOW), corresponding to the columns of our precomputed TFIDF matrix $V$, ignoring words that appear only in the query.
 The resulting score is then the normalized (not to favor long queries) dot product of a row of the matrix and the BOW representation of the query $q$ denoted $\vec{q}$.
 We can obtain the scores for every query document pair by matrix multiplication:
-$$
-f_D(q, d) = \frac{V\vec{q}}{|\vec{q}|} \in \R^{|D|}\ ,
-$$
+\begin{equation}
+        f_D(q, d) = \frac{V\vec{q}}{|\vec{q}|} \in \R^{|D|}\ ,
+\end{equation}
 provided that matrix $V$ is row-normalized (euclidian norm of each row is equal to one).
 Please note that this is equivalent to computing the cosine similarity for each document and query vector pair.
 
@@ -103,15 +114,15 @@ Over the years, multiple versions of the TFIDF approach appeared, differing slig
 A more complex term weighting scheme is Best Match 25 \citep{bm25}:
 %One of the best performing versions \citep{bm_vs_tfidf} is Best Match 25 (BM25) by \cite{bm25}.
 %The original formula is:
-$$
+\begin{equation}
 \text{BM25}(q, d) = 
         \sum_{t\in q}
         \text{idf}(t, d)
-        \cdot \frac{(k_1 + 1)\cdot\text{count}(t, d)}{k_1(1-b + b \cdot (L_d / L_{avg})) + \text{count}(t, d)} 
-        \cdot \frac{(k_3 + 1)\cdot\text{count}(t, q)}{k_3 + \text{count}(t, q)}
+        \cdot \frac{(k_1 + 1)\cdot\text{c}(t, d)}{k_1(1-b + b \cdot (L_d / L_{avg})) + \text{c}(t, d)} 
+        \cdot \frac{(k_3 + 1)\cdot\text{c}(t, q)}{k_3 + \text{c}(t, q)}
 \ ,
-$$
-where $\text{count}(t,d)$ is the raw count of the term $t$ in the document $d$.
+\end{equation}
+where $\text{c}(t,d)$ is the raw count of the term $t$ in the document $d$. $L_d$ and $L_{avg}$ are the current document's length the average document length, respectively.
 
 The first term is IDF.
 The second term is TF with two tuning parameters $k_1$ and $b$. Parameter $k_1$ corresponds directly to TF scaling, while parameter $b$ corresponds to scaling by the inverse of the document's length.
@@ -145,7 +156,10 @@ Its hidden states could also be used to encode the input into a fixed-length vec
 Intuitively, the vector contains the meaning of the original input. 
 Such an approach is the Sequence to Sequence (seq2seq or encoder-decoder) model architecture \citep{seq2seq} with significant use-case in machine translation.
 
-As an improvement to the seq2seq models, the attention mechanism was introduced by \citet{first-attention}, explaining their motivation as follows: ``In this paper, we conjecture that the use of a fixed-length vector is a bottleneck in improving the performance of this basic encoder-decoder architecture, and propose to extend this by allowing a model to automatically (soft-)search for parts of a source sentence that are relevant to predicting a target word, without having to form these parts as a hard segment explicitly.'' The attention mechanism is in-depth described in subsection \ref{subsec:attention}.
+As an improvement to the seq2seq models, the attention mechanism was introduced by \citet{first-attention}.
+The authors viewed the RNNs as a bottleneck to improving the model's performance.
+They proposed an automatic method of enriching parts of the input with other relevant parts of the input, eliminating the need to process the input as a whole.
+The attention mechanism is in-depth described in subsection \ref{subsec:attention}.
 
 % TODO check if this sits nicely
 \begin{figure}[b!]
@@ -244,7 +258,7 @@ While seq2seq architecture can work with arbitrary sequence types, BERT is a lan
 Specifically, it is just the encoder part of the seq2seq architecture, meant for computing real-valued fixed-length vector representation of the input that can further be used by other neural models (usually shallow fully-connected feedforward networks).
 The encoder is trained on a large amount of unlabeled text data (corpus) in a phase called pre-training.
 This phase, accounting for a great number of the model's parameters ($\approx$ 110 million in its base form), consumes a significant amount of power. 
-The model can then be fine-tuned, that is, trained for the task we want to apply it on, such as Named Entity Recognition (NER), Natural Language Inference (NLI), or Question Answering (QA). 
+The model can then be fine-tuned, that is, trained for the task we want to apply it on, such as Named Entity Recognition (NER) \citep{ner}, Natural Language Inference (NLI) \citep{nli-bowman,nli-williams}, or Question Answering (QA) \citep{squad}. 
 This is done by usually adding one fully connected layer after the encoder output and relatively short training (of all parameters) with the usage of a smaller amount of labeled data. 
 
 Intuitively, the pre-training ``teaches'' the language and word meanings while the fine-tuning only ``explains'' the final task to the model.
@@ -329,13 +343,12 @@ The last one is the swapping of the parameters of the currently unused layer fro
 
 \subsubsection{Performer}
 
-TODO WARNING MIGHT NOT BE USED
 Performer model \citep{performer} looks at the self-attention mechanism, concretely at the softmax substep $A=\exp(\frac{QK^T}{\sqrt{d}})$, as a randomized kernel function: 
 \begin{equation}
     A_{i,j}=K(q_i,k_j)=\mathbb{E}[\phi(q_i)^T\phi(k_j)]\ ,
 \end{equation}
 where K is a kernel function $K\colon\R^d\times\R^d\rightarrow\R$ defined for a feature map $\phi\colon\R^d\rightarrow\R^r$.
-The authors approximate the attention by using the randomized feature map to define matrices $Q', K'\in\R^{n\times r}$, with the rows equal to $\phi(q_i^T)^T$ and $\phi(k_i^T)^T$, respectivelly.
+The authors approximate the attention by using the randomized feature map to define matrices $Q', K'\in\R^{n\times r}$, with the rows equal to $\phi(q_i^T)^T$ and $\phi(k_i^T)^T$, respectively.
 Then, by calculating in the paranthesized order
 \begin{equation}
         AV = (Q'(K'V))
@@ -368,7 +381,7 @@ The full attention matrix can be written as
 where $A_S\in\R^{m\times m}$ and other matrices are of appropriate shapes, with $m$ being the number of samples (landmarks). 
 One could approximate the attention by expressing the matrix $C_S$ using the other matrices: $C_S=F_SA_S^+B_S$. The $+$ sign indicates the Moore-Penrose inverse.
 
-Such usage of Nyst\"om approximation will not help, as the samples can only be obtained after the attention matrix is computed -- the softmax operation needs the whole matrix $QK^T$ (or at least its rows) to be complete. 
+Such usage of Nystr\"om approximation will not help, as the samples can only be obtained after the attention matrix is computed -- the softmax operation needs the whole matrix $QK^T$ (or at least its rows) to be complete. 
 Nevertheless, the authors do compute softmax over only the subsampled parts of the $QK^T$ matrix and use the resulting softmax-ed matrices to compute the approximated attention.
 The final approximated attention is obtained by 
 \begin{equation}
@@ -383,7 +396,7 @@ The final approximated attention is obtained by
         \right)
         \ ,
 \end{equation}
-where $\sim$ indicates a subsampled matrix. The parenthesization ensures that the computation remains efficient. The final memory and time complexity is $\bigO(n)$, provided $m<<n$.
+where $\sim$ indicates a subsampled matrix. The parenthesization ensures that the computation remains efficient. The final memory and time complexity is $\bigO(n)$, provided $m\ll n$.
 
 The only theoretical guarantee presented directly in the paper is that if the landmarks are equal to the original keys and queries, then the approximation converges to the true attention. 
 However, this holds trivially.
@@ -408,7 +421,9 @@ The authors note that thanks to the theoretical results from \citep{nystr-2017} 
 The first paper states that the error of Nystr\"om approximation decreases with the matrix's rank.
 In the second paper, the authors suggest that the attention mechanism produces low-rank matrices.  
 
-\subsection{Encoder Usage}
+\subsection{Encoder Utilization in Document Retrieval}
+
+We have, so far, introduced the encoder model, but we have yet to describe how to use it in document retrieval. We can look at the neural-model-generated encodings in a way similar to the traditional approaches.
 
 Traditional approaches result in a sparse representation of the knowledge base with the feature dimensionality equal to the corpus's vocabulary size (the vocabulary can also contain n-grams or character n-grams if it is advantageous).
 Therefore, it can be considered a weighting scheme, assigning "importance" to each word present in the document. 
@@ -463,7 +478,7 @@ For regression tasks, TODO.
 They compare their method against averaging all the output tokens' representations, selecting the out representation of special input token \texttt{[CLS]} situated at the front of the input, and against averaging input tokens' GloVe \citep{glove} word vectors.
 The authors note that if the fine-tuning step is not performed, the BERT model provides little to no improvement to averaging input tokens' word vectors.
 
-The authors of \citep{two-tower} proposed a different approach designed directly for the task of document retrieval, in their case, over Wikipedia articles. 
+The authors of \citep{two-tower} proposed a different approach, designed directly for the task of document retrieval, in their case, over Wikipedia articles. 
 They apply a fully-connected linear layer to the \texttt{[CLS]} token's representation and also pre-train the BERT model on three additional document retrieval tasks:
 \begin{itemize}
         \item \textbf{Inverse Cloze Task (ICT)} - Training the model to embed sentences close to the paragraph from which they were selected. The selected sentences are omitted from the paragraph in the training step.
