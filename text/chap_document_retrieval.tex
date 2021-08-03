@@ -302,6 +302,27 @@ It arises by allowing some positions to attend to the whole input and making the
 
 To utilize the benefits of this sparsified attention, the authors had to implement a custom CUDA kernel capable of computing parts of matrix multiplication effectively.
 
+\subsubsection{BigBird}
+
+The BigBird model \citep{bigbird} adopts a similar approach.
+The model also combines windowed and global attention with the addition of random attention.
+The random attention pattern is generated per input and in a way to attend to exactly $r$ tokens in one row. Again, the intuition is that thanks to the pattern of the attention matrix, the omitted parts are reachable in just a few layers deep.
+
+The authors prove theoretical guarantees for the model, namely that the attention pattern is able to approximate an arbitrary attention matrix.
+However, in the worst case, the number of layers needed is $m$, making the guarantee nonetheless rely on empirical evidence.
+
+\begin{figure}[!htb]
+        \centering
+        \includegraphics[width=\textwidth]{bigbird_attention.pdf}
+        \caption[BigBird Attention Patterns]{BigBird attention patterns with parameters $r=2, w=3, g=2$, the last being the number of first tokens to attend to globally. Reprinted from \citep{bigbird}.}
+        \label{fig:bigbird_attention}
+\end{figure}
+
+BigBird and Longformer both propose pattern-based attention, granting them $\bigO(n)$ complexity.
+However, they do introduce additional meta-parameters, which in order for the model to function perform on BERT's level, have to be set to large values. 
+
+The paper also discusses techniques to make the computation of the patterns suitable for GPU, such as block-attention, where sparse tokens are ``enlarged'' to bigger blocks, and reshaping the final matrix to a rectangle shape.
+
 \subsubsection{Reformer}
 
 Reformer architecture \citep{reformer} offers two changes to the transformer model.
