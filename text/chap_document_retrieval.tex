@@ -360,6 +360,7 @@ The attention mechanism itself is changed only by introducing non-trainable proj
 The resulting time and space complexity is $\bigO(kn)$. 
 
 The authors also tested multiple techniques of sharing the projection matrices, concluding that the model's results were preserved when all the attention heads and layers used the same $E,F$ matrices, even when $E=F$.
+They also proposed using different projected dimensions $k$ for different heads and layers, motivated by Figure \ref{fig:linformer_lowrank} (right), although no tests were performed.
 
 \begin{figure}[!htb]
         \centering
