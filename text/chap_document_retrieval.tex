@@ -313,11 +313,12 @@ The problem of finding the closest vectors is still in $\bigO(n^2)$ since we nee
 Here the authors utilize LSH for finding the closest vectors.
 Hash function $h(x)$ is locality-sensitive if it maps nearby vectors to the same hash with high probability. 
 The simplified base idea is that under random linear projections (randomly initialized matrix) into $n_{buckets}$ dimensional space, nearby vectors preserve their orientation, thus sharing the dimension index where they show the highest values.
-Multiple random projections are performed in parallel to reduce the probability of similar vectors differing in the maximal indices.
+Multiple random linear projections are performed in parallel to reduce the probability of similar vectors differing in the maximal indices.
 After the LSH computation is finished, each vector has been assigned to a ``bucket''.
 Then the matrix $Q$ is sorted so that vectors from the same buckets are in a sequence.
 What follows is the computation of full attention, but only on parts of the sorted matrix.
 The parts are selected so that each bucket attends to all of the vectors in the bucket and one previous bucket, see Figure \ref{fig:reformer_buckets}.
+LSH does reduce attention computation time, but it introduces a large constant $c=n_{buckets}^2$ to the memory and time complexity since $n_buckets$ is typically 128.
 The authors also noted that setting $Q=K$ did not negatively impact the model's performance, and therefore LSH is applied only to the matrix $Q$.
 
 Another way to look at the LSH bucketing is to compute the dot product of the input vectors with a sequence of $\dfrac{n_{buckets}}{2}$ random vectors followed by their negative counterparts of the same dimension as the input vectors.
