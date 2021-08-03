@@ -300,7 +300,7 @@ It arises by allowing some positions to attend to the whole input and making the
         \label{fig:longformer_attention}
 \end{figure}
 
-To utilize the benefits of this sparsified attention, the authors had to implement a custom CUDA kernel capable of computing parts of matrix multiplication effectively. 
+To utilize the benefits of this sparsified attention, the authors had to implement a custom CUDA kernel capable of computing parts of matrix multiplication effectively.
 
 \subsubsection{Reformer}
 
@@ -348,7 +348,7 @@ Linformer model \citep{linformer} proposes a projection method to make the atten
 The authors propose that the softmax part of the attention is low-rank, and therefore it is possible to perform an approximate calculation in lower dimensions. The theory stands on the distributional
 Johnson–Lindenstrauss lemma \citep{JL-lemma}, using its formulation from \citep{JL-formulation}. 
 It states that given $k\leq n$, a random gaussian projection from an $n$-dimensional space into $k$-dimensional space with zero-mean and $\frac{1}{k}$ standard deviation, preserves vectors' lengths and pairwise dot products with high probability.
-They prove that for the softmax part, the projection dimension $k$ can be set to $\min\{\Theta(9d\log(d)/\epsilon^2),5\Theta(\log(n)/\epsilon^2)\}$, while keeping the approximation error reasonably low \citep[Theorem 2]{linformer}.
+They prove that for the softmax part, the projection dimension $k$ can be set to $\min\{\Theta(9d\log(d)/\epsilon^2),5\Theta(\log(n)/\epsilon^2)\}$ while keeping the approximation error reasonably low \citep[Theorem 2]{linformer}.
 
 The projection matrices $E, F$ are in the proof defined as $E=\delta R, F=e^{-\delta}R$ for $R\in\R^{k\times n}$ with iid entries from $\mathcal{N}(0,\frac{1}{k})$ and a small constant $\delta$.
 The attention mechanism itself is changed only by introducing non-trainable projection matrices when computing the keys and the values:
@@ -359,7 +359,7 @@ The attention mechanism itself is changed only by introducing non-trainable proj
 \end{equation}
 The resulting time and space complexity is $\bigO(kn)$. 
 
-The authors also tested multiple techniques of sharing the projection matrices, concluding that the model's results were preserved, when all the attention heads and layers used the same $E,F$ matrices, even when $E=F$.
+The authors also tested multiple techniques of sharing the projection matrices, concluding that the model's results were preserved when all the attention heads and layers used the same $E,F$ matrices, even when $E=F$.
 
 \begin{figure}[!htb]
         \centering
@@ -369,7 +369,8 @@ The authors also tested multiple techniques of sharing the projection matrices, 
 \end{figure}
 
 We want to note that \citep[Theorem 1]{linformer} provides no insight since it holds for arbitrary matrix $P$. 
-The authors do, however, provide an anecdotal evidence of the attention mechanism's low rank (see Figure \ref{fig:linformer_lowrank}).
+However, the authors do provide anecdotal evidence of the
+attention mechanism’s low rank (see Figure \ref{fig:linformer_lowrank}).
 
 \subsubsection{Performer}
 
