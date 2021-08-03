@@ -342,6 +342,35 @@ The last one is the swapping of the parameters of the currently unused layer fro
         \label{fig:revnets}
 \end{figure}
 
+\subsubsection{Linformer}
+
+Linformer model \citep{linformer} proposes a projection method to make the attention mechanism linear.
+The authors propose that the softmax part of the attention is low-rank, and therefore it is possible to perform an approximate calculation in lower dimensions. The theory stands on the distributional
+Johnson–Lindenstrauss lemma \citep{JL-lemma}, using its formulation from \citep{JL-formulation}. 
+It states that given $k\leq n$, a random gaussian projection from an $n$-dimensional space into $k$-dimensional space with zero-mean and $\frac{1}{k}$ standard deviation, preserves vectors' lengths and pairwise dot products with high probability.
+They prove that for the softmax part, the projection dimension $k$ can be set to $\min\{\Theta(9d\log(d)/\epsilon^2),5\Theta(\log(n)/\epsilon^2)\}$, while keeping the approximation error reasonably low \citep[Theorem 2]{linformer}.
+
+The projection matrices $E, F$ are in the proof defined as $E=\delta R, F=e^{-\delta}R$ for $R\in\R^{k\times n}$ with iid entries from $\mathcal{N}(0,\frac{1}{k})$ and a small constant $\delta$.
+The attention mechanism itself is changed only by introducing non-trainable projection matrices when computing the keys and the values:
+\begin{equation}
+        \text{LinAttn}(Q,K,V)=\text{Attention}(Q,EK,FV)=
+        \text{softmax}\left(\frac{Q(EK)^T}{\sqrt{d}}\right)FV
+        \ .
+\end{equation}
+The resulting time and space complexity is $\bigO(kn)$. 
+
+The authors also tested multiple techniques of sharing the projection matrices, concluding that the model's results were preserved, when all the attention heads and layers used the same $E,F$ matrices, even when $E=F$.
+
+\begin{figure}[!htb]
+        \centering
+        \includegraphics[width=\textwidth]{linformer_lowrank.png}
+        \caption[Rank of the Attention Mechanism]{Anecdotal evidence of the low rank of a pretrained transformer's attention mechanism. Higher cumulative sum of eigenvalues indicates the amount of information in the included indices. Reprinted from \citep{linformer}.}
+        \label{fig:linformer_lowrank}
+\end{figure}
+
+We want to note that \citep[Theorem 1]{linformer} provides no insight since it holds for arbitrary matrix $P$. 
+The authors do, however, provide an anecdotal evidence of the attention mechanism's low rank (see Figure \ref{fig:linformer_lowrank}).
+
 \subsubsection{Performer}
 
 Performer model \citep{performer} looks at the self-attention mechanism, concretely at the softmax substep $A=\exp(\frac{QK^T}{\sqrt{d}})$, as a randomized kernel function: 
