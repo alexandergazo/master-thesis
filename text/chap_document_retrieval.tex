@@ -368,7 +368,7 @@ The parameter $m$ does depend on the L2-norm of the queries and keys, the dimens
 
 \subsubsection{\nystr{}}
 
-Nystr\"omformer's \citep{nystrom} base idea is to approximate the attention computation by subsampling the original $Q$ and $K$ matrices and using a Nystr\"om-based method to approximate the full attention. 
+Nystr\"omformer's \citep{nystrom} base idea is to approximate the attention computation by subsampling the original $Q$ and $K$ matrices and using a Nystr\"om-based method \citep{nystrom-matrix-approx} to approximate the full attention. 
 The subsampling is done by splitting the $Q$ and $K$ matrices into equally sized segments and then averaging each part into single vectors, calling them landmarks.
 
 The full attention matrix can be written as
@@ -380,7 +380,7 @@ The full attention matrix can be written as
         \end{bmatrix}V\ ,
 \end{equation}
 where $A_S\in\R^{m\times m}$ and other matrices are of appropriate shapes, with $m$ being the number of samples (landmarks). 
-One could approximate the attention by expressing the matrix $C_S$ using the other matrices: $C_S=F_SA_S^+B_S$. The $+$ sign indicates the Moore-Penrose inverse.
+The authors note that using \citep{nystrom-matrix-approx}, one could approximate the attention by expressing the matrix $C_S$ using the other matrices: $C_S=F_SA_S^\dagger B_S$. The $\dagger$ sign indicates the Moore-Penrose inverse.
 
 Such usage of the Nystr\"om approximation will not help, as the samples can only be obtained after the attention matrix is computed -- the softmax operation needs the whole matrix $QK^T$ (or at least its rows) to be complete. 
 Nevertheless, the authors do compute softmax over only the subsampled parts of the $QK^T$ matrix and use the resulting softmax-ed matrices to compute the approximated attention.
@@ -389,7 +389,7 @@ The final approximated attention is obtained by
         \widehat{\text{Attn}}(Q,K,V)=
         \left(
         \text{softmax}\left(\frac{Q\tilde{K}^T}{\sqrt{d}}\right)
-        \text{softmax}\left(\frac{\tilde{Q}\tilde{K}^T}{\sqrt{d}}\right)^+
+        \text{softmax}\left(\frac{\tilde{Q}\tilde{K}^T}{\sqrt{d}}\right)^\dagger
         \right)
         \left(
         \text{softmax}\left(\frac{\tilde{Q}K^T}{\sqrt{d}}\right)
@@ -404,9 +404,9 @@ However, this holds trivially.
 Proper theoretical guarantees are located in the appended repository\footnote{\url{https://github.com/mlpen/Nystromformer/}}.
 There, the difference between true attention and the approximation is bounded by:
 \begin{equation}
-        ||\text{Attn}-\widehat{\text{Attn}}||_\infty\leq(1+||A^+_S||_\infty+||A^+_S-Z^*||_\infty)||V||_\infty\ ,
+        ||\text{Attn}-\widehat{\text{Attn}}||_\infty\leq(1+||A^\dagger_S||_\infty+||A^\dagger_S-Z^*||_\infty)||V||_\infty\ ,
 \end{equation}
-where $||\cdot||_\infty$ is the maximum absolute column sum, and $Z^*$ is the result of the GPU-compatible iterative algorithm \citep{iterative-moore} used by the authors to compute the Moore-Penrose inverse.
+where $||\cdot||_\infty$ is the maximum absolute column sum, and $Z*$ is the result of the GPU-compatible iterative algorithm \citep{iterative-moore} used by the authors to compute the Moore-Penrose inverse.
 The authors report good results on various tasks, even though the softmax operation is performed on submatrices only. 
 The adverse effects might be reduced by the fact that landmarks are calculated as segment means, and therefore, the original information is present during the softmax step.
 Figure \ref{fig:nystrom_example} provides an anecdotal comparison between full self-attention and the approximated attention.
