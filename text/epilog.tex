@@ -1,4 +1,26 @@
 \chapter*{Conclusion}
 \addcontentsline{toc}{chapter}{Conclusion}
 
-Bye
+We introduced the problem of fact-checking and described modern approaches to the problem.
+We explained the motivation for studying the topic and proposed using new neural models to help with automatic fact-checking.
+Our research team created the first fact-checking dataset in the Czech language \citep{ullrich} and explored different models' architectures capable of good performance.
+Inspired by the FEVER pipeline \citep{fever} (see Figure \ref{fig:pipeline}), we split the problem into two distinct tasks -- document retrieval and natural language inference.
+
+In this thesis, we deal with the document retrieval task.
+We first defined the task formally and then introduced well-established traditional techniques for the task.
+Then followed a brief description of the progress from RNN-based language models to transformers \citep{attention-is-all-you-need} and BERT \citep{bert}.
+Since the BERT model as described in \citep{bert} and as adopted across the research field perform best only for inputs up to 512 tokens, we were forced to work over paragraphs instead of the whole documents. 
+Our colleagues \citep{rypar} and \citep{dedkova} studied this type of document retrieval.
+
+This thesis explored whether we could improve retrieval performance by utilizing whole articles. 
+We provided a summary of currently available papers regarding transformer language models supporting long inputs, namely Longformer, BigBird, Reformer, Linformer, Performer, and \nystr{}.
+Since no pre-trained models for the Czech language were available, we either trained them from scratch or utilized the student-teacher method \citep{student-teacher} described in Section \ref{subsec:distillation}.
+Lastly, we compared the traditional, short-input, and long-input approaches in the document retrieval task and analyzed the results.
+
+The resulting models turned out not to outperform classic BERT with paragraph-level splitting, but TODO.
+
+\subsubsection{Future Work}
+
+As time progresses, automatic fact-checking will be needed more and more.
+With the joint effort across the machine learning research field, we hope to train better TODO.
+We wish to continue improving the created \CTK{} dataset and to now focus on the natural language inference task of the fact-checking pipeline. 
