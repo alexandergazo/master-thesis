@@ -458,7 +458,7 @@ The full attention matrix can be written as
 where $A_S\in\R^{m\times m}$ and other matrices are of appropriate shapes, with $m$ being the number of samples (landmarks). 
 The authors note that using \citep{nystrom-matrix-approx}, one could approximate the attention by expressing the matrix $C_S$ using the other matrices: $C_S=F_SA_S^\dagger B_S$. The $\dagger$ sign indicates the Moore-Penrose inverse.
 
-Such usage of the Nystr\"om approximation will not help, as the samples can only be obtained after the attention matrix is computed -- the softmax operation needs the whole matrix $QK^T$ (or at least its rows) to be complete. 
+Such usage of the Nystr\"om approximation will not help, as the samples can only be obtained after the attention matrix is computed -- the softmax operation needs the whole matrix $QK^T$ (or at least its rows). 
 Nevertheless, the authors do compute softmax over only the subsampled parts of the $QK^T$ matrix and use the resulting softmax-ed matrices to compute the approximated attention.
 The final approximated attention is obtained by 
 \begin{equation}
@@ -491,6 +491,7 @@ Figure \ref{fig:nystrom_example} provides an anecdotal comparison between full s
         \centering
         %originally 6
         %\includegraphics[width=.7\textwidth]{nystrom_example.png}
+        \hspace{.5cm}
         \begin{subfigure}{.7\textwidth}
                 \begin{minipage}[c]{0.8\linewidth}
                 \centering True self-attention
@@ -603,7 +604,27 @@ The available monolingual Czech models are RobeCzech \citep{robeczech} and Czert
 Authors of RobeCzech compare their model with other models mentioned in this section on five NLP tasks, claiming improvement over SOTA in all of them.
 
 As of writing, we are not aware of pre-trained models supporting long inputs in the Czech language.
+In the next section, we present methods for utilizing pre-trained without the need for training from scratch.
 
 \subsection{Distillation}
+\label{subsec:distillation}
 
+Knowledge distillation \citep{kw1, kw2} is a compression method in which we train a compact model (student) to mimic the predictions of a more complex model (teacher).
+The main idea is to feed both the teacher and the student the same input and training only the student using the error between the student's and the teacher's predictions as the objective function.
+The method has been successfully applied to various model ensembles, producing a single model able to perform competitively \citep{kw2}. 
+\citet{distilbert} apply the method to BERT, producing DistilBert -- a BERT model initialized from pre-trained BERT but only with half the number of layers.
+Trained DistilBERT retains 97\% of the original model's performance, according to the authors.
 
+\begin{figure}[!htb]
+        \centering
+        \includegraphics[width=.8\linewidth]{multilingual-distillation.png}
+        \caption[Multilingual Distillation]{Multilingual distillation training example on EN-DE parallel sentences. Reprinted from \citep{student-teacher}.}
+        \label{fig:multilingual_distillation}
+\end{figure}
+
+The method can also be utilized to teach a new language to a model using parallel language data, that is, a collection of the same sentences in multiple languages.
+\citet{student-teacher} propose ``multilingual distillation'' in which the teacher model is a well-performing monolingual representation model. 
+The teacher model is fed only sentences of its ``native'' language, while the student model is fed sentences in all the languages. 
+The student model is trained using the sum of all the losses over all the languages as the objective function.
+The process is depicted in Figure \ref{fig:multilingual_distillation}.
+The aim is to train the student model to generate the same representations of sentences of the same meaning, regardless of their written language.
