@@ -339,7 +339,7 @@ After the LSH computation is finished, each vector has been assigned to a ``buck
 Then the matrix $Q$ is sorted so that vectors from the same buckets are in a sequence.
 What follows is the computation of full attention, but only on parts of the sorted matrix.
 The parts are selected so that each bucket attends to all of the vectors in the bucket and one previous bucket, see Figure \ref{fig:reformer_buckets}.
-LSH does reduce attention computation time, but it introduces a large constant $c=n_{buckets}^2$ to the memory and time complexity since $n_buckets$ is typically 128.
+LSH does reduce attention computation time, but it introduces a large constant $c=n_{buckets}^2$ to the memory and time complexity since $n_{buckets}$ is typically 128.
 The authors also noted that setting $Q=K$ did not negatively impact the model's performance, and therefore LSH is applied only to the matrix $Q$.
 
 Another way to look at the LSH bucketing is to compute the dot product of the input vectors with a sequence of $\dfrac{n_{buckets}}{2}$ random vectors followed by their negative counterparts of the same dimension as the input vectors.
@@ -386,7 +386,7 @@ They also proposed using different projected dimensions $k$ for different heads 
 \begin{figure}[!htb]
         \centering
         \includegraphics[width=\textwidth]{linformer_lowrank.png}
-        \caption[Rank of the Attention Mechanism]{Anecdotal evidence of the low rank of a pretrained transformer's attention mechanism. Higher cumulative sum of eigenvalues indicates the amount of information in the included indices. Reprinted from \citep{linformer}.}
+        \caption[Rank of the Attention Mechanism]{Anecdotal evidence of the low rank of a pre-trained transformer's attention mechanism. Higher cumulative sum of eigenvalues indicates the amount of information in the included indices. Reprinted from \citep{linformer}.}
         \label{fig:linformer_lowrank}
 \end{figure}
 
@@ -541,11 +541,24 @@ They apply a fully-connected linear layer to the \texttt{[CLS]} token's represen
 The authors reported significant improvements compared to using only MLM for the pre-training phase.
 % USED ABOVE They use the model's final representation of the special input token \verb{[CLS]}, situated at the front of the input, as the representation of the whole input. 
 
-\subsection{Czech Language}
+\subsection{Language Support}
 
-TODO
-%The introduced BERT-based models are seldom trained on Czech data.
+The models described in previous sections are capable of multilingual learning.
+In representation learning, we strive to train models, which for two similar texts in different languages provide similar representations.
+Some \citep{cross-lingual} use additional training tasks utilizing parallel data to achieve this property.
+Multilingual models are expected not to outperform monolingual models.
+However, a large multilingual model XLM-RoBERTa (XLM-R) \citep{xlmr} was able to perform competitively with monolingual models on the English language, as well as on the Czech language \citep{mackova}.
+XLM-R performs well even without explicitly training on a multilingual task, using only unlabeled data.
+It was trained on a vast English corpus and one hundred small corpora in different languages. 
+\citet{cross-lingual} further confirm that training a model in this way provides competitive results.
+\citet{mackova} hypothesize that the greedy SGD forces the model to exploit existing similarities between the learned languages since by exploiting these similarities, the model saves its capacity allowing for better performance during training.
+Other recently introduced multilingual models are SlavicBERT \citep{deep-pavlov} -- tuned for NER and trained using Russian news and Bulgarian, Czech, Polish, and Russian Wikipedias -- and mBERT -- a BERT representation model trained on multilingual data.
+
+The available monolingual Czech models are RobeCzech \citep{robeczech} and Czert \citep{czert}, both language representation models based on BERT architecture.
+Authors of RobeCzech compare their model with other models mentioned in this section on five NLP tasks, claiming improvement over SOTA in all of them.
+
+As of writing, we are not aware of pre-trained models supporting long inputs in the Czech language.
 
 \subsection{Distillation}
 
-TODO
+
