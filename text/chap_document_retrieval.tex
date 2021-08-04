@@ -523,11 +523,18 @@ Our colleague \citet{dedkova} provides a detailed look into the use of such meth
 
 \subsubsection{Generating Representations}
 
-Generating the dense representations, also called embeddings since we project the input into a vector space with a specific dimension, is, in general, a well-studied area of research. We restrict ourselves to neural methods described in Section \ref{sec:neural_approaches}. 
+Generating the dense representations, also called embeddings since we project the input into a vector space with a specific dimension, is, in general, a well-studied area of research.
+We restrict ourselves to neural methods described in Section \ref{sec:neural_approaches}. 
+
+\begin{figure}[!htb]
+        \centering
+        \includegraphics[width=\textwidth]{sbert_architectures.png}
+        \caption[SBERT Architectures]{The left figure depicts SBERT architecture for classification, and the right depicts regression architecture. Both BERTs in each figure share their weights. Reprinted from \citep{sbert}.}
+        \label{fig:sbert_architectures}
+\end{figure}
 
 There are multiple ways to generate the input's embedding from the model-processed tokens.
-Sentence-BERT \citep{sbert} adds a pooling layer, either \texttt{MAX} or \texttt{MEAN}, and fine-tunes the model using two different approaches, depending on the task.
-For regression tasks, TODO.
+Sentence-BERT \citep{sbert} adds a pooling layer, either \texttt{MAX} or \texttt{MEAN}, and fine-tunes the model using two different approaches, depending on the task (see Figure \ref{fig:sbert_architectures}).
 They compare their method against averaging all the output tokens' representations, selecting the out representation of special input token \texttt{[CLS]} situated at the front of the input, and against averaging input tokens' GloVe \citep{glove} word vectors.
 The authors note that if the fine-tuning step is not performed, the BERT model provides little to no improvement to averaging input tokens' word vectors.
 
