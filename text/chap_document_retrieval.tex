@@ -164,7 +164,7 @@ The attention mechanism is in-depth described in subsection \ref{subsec:attentio
 % TODO check if this sits nicely
 \begin{figure}[b!]
         \centering
-        \includegraphics[width=.5\textwidth]{transformer.pdf}
+        \includegraphics[width=.5\textwidth]{transformer.png}
         \caption[Transformer Model Architecture]{The transformer model architecture. Reprinted from \citep{attention-is-all-you-need}.}
         \label{fig:transformer}
 \end{figure}
@@ -313,7 +313,27 @@ However, in the worst case, the number of layers needed is $m$, making the guara
 
 \begin{figure}[!htb]
         \centering
-        \includegraphics[width=\textwidth]{bigbird_attention.pdf}
+        %\includegraphics[width=\textwidth]{bigbird_attention.pdf}
+        \begin{subfigure}{.22\textwidth}
+                \includegraphics[width=\linewidth]{bigbird_attn_random.pdf}
+                \caption{Random attention}
+                \label{fig:rnd_atn}
+            \end{subfigure}\hfill
+            \begin{subfigure}{.22\textwidth}
+                \includegraphics[width=\linewidth]{bigbird_attn_window.pdf}
+                \caption{Window attention}
+                \label{fig:wnd:atn}
+            \end{subfigure}\hfill
+            \begin{subfigure}{.22\textwidth}
+                \includegraphics[width=\linewidth]{bigbird_attn_global.pdf}
+                \caption{Global Attention}
+                \label{fig:gbl_atn}
+            \end{subfigure}\hfill
+            \begin{subfigure}{.22\textwidth}
+                \includegraphics[width=\linewidth]{bigbird_attn.pdf}
+                \caption{\textsc{BigBird}}
+                \label{fig:bigb_atn}
+            \end{subfigure}
         \caption[BigBird Attention Patterns]{BigBird attention patterns with parameters $r=2, w=3, g=2$, the last being the number of first tokens to attend to globally. Reprinted from \citep{bigbird}.}
         \label{fig:bigbird_attention}
 \end{figure}
@@ -358,7 +378,11 @@ The last one is the swapping of the parameters of the currently unused layer fro
 
 \begin{figure}[!htb]
         \centering
-        \includegraphics{revnets.pdf}
+        (a)
+        \includegraphics[scale=0.45]{revnets_forward.png}
+        (b)
+        \includegraphics[scale=0.45]{revnets_backward.png}
+        %\includegraphics{revnets.png}
         \caption[RevNet Scheme]{The forward \textbf{(a)} and the backward \textbf{(b)} computations scheme of a residual block. Reprinted from \citep{revnets}.}
         \label{fig:revnets}
 \end{figure}
@@ -465,7 +489,21 @@ Figure \ref{fig:nystrom_example} provides an anecdotal comparison between full s
 
 \begin{figure}[!htb]
         \centering
-        \includegraphics{nystrom_example.pdf}
+        %originally 6
+        %\includegraphics[width=.7\textwidth]{nystrom_example.png}
+        \begin{subfigure}{.7\textwidth}
+                \begin{minipage}[c]{0.8\linewidth}
+                \centering True self-attention
+                \includegraphics[width=1.0\textwidth]{nystrom_attn_true.png}
+                \centering Nystr\"{o}m approximate self-attention
+                \includegraphics[width=1.0\textwidth]{nystrom_attn.png}
+        \end{minipage}
+                \hfill
+        \begin{minipage}[c]{0.12\linewidth}
+                \centering 
+                \includegraphics[width=0.9\textwidth]{nystrom_attn_bar.png}
+        \end{minipage}
+        \end{subfigure}
         \caption[\nystr{} Attention Example]{Anecdotal comparision of the true attention and Nystr\"om approximation. Reprinted from \citep{nystrom}.}
         \label{fig:nystrom_example}
 \end{figure}
