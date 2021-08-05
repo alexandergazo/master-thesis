@@ -34,6 +34,6 @@ The specific formulas are:
 \begin{equation}
     \text{MRR} = \frac{1}{|Q|}\sum_{i=1}^{|Q|}{\frac{1}{\text{rank}_i}}\ ,
 \end{equation}
-where $Q$ is a set of queries and $\text{rank}_i$ is the rank of the first relevant document retrieved.
+where $Q$ is a sequence of queries and $\text{rank}_i$ is the rank of the first relevant document retrieved for the query $q_i$.
 
 Since precision and recall depend on the number $k$ of retrieved documents, we evaluate the models with varying $k$ and denote each evaluation with the suffix $\text{@}k$.
