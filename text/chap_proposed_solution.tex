@@ -1,11 +1,39 @@
-\chapter{Proposed Solution}
+\chapter{Proposed Solutions}
 
-\section{Models}
-\subsection{Baselines}
-\subsection{Neural Models}
+\section{Baselines}
 
-\section{Metrics}
-\subsection{Precision}
-\subsection{Recall}
-\subsection{F Score}
-\subsection{MRR}
+As the baseline, we have decided to use BM25, as proposed by \citet{weak-baselines}.
+We use the Pyserini\footnote{\url{https://github.com/castorini/pyserini/}} python toolkit for information retrieval \citep{pyserini} -- a python interface for the Anserini\footnote{\url{https://github.com/castorini/Anserini}} library \citep{anserini1, anserini2}, originally implemented in Java, building on the Lucene\footnote{\url{https://lucene.apache.org/}} library.
+The Pyserini library is a highly optimized library implementing multiple search algorithms.
+
+\section{Neural Models}
+
+\section{Evaluation Metrics}
+
+Document retrieval is best evaluated when dealing with evidence sets by the model's ability to match the evidence set with retrieved documents.
+By the retrieved documents, we mean the sequence of $k$ documents from the knowledge base with the highest scores.
+We can match the evidence set in multiple ways, motivating multiple measures of performance:
+\begin{itemize}
+    \item \textbf{Precision} - We try to ``fit within'' the evidence set with retrieved documents.
+    \item \textbf{Recall} - We try to ``cover'' the evidence set.
+    \item \textbf{F1} - The harmonic mean of precision and recall. 
+    \item \textbf{Mean Reciprocal Rank (MRR)} \citep{mrr} - We try to retrieve the relevant documents at the first positions. 
+\end{itemize}
+The specific formulas are: 
+\begin{equation}
+    \text{precision} = \frac{|\{\text{evidence documents}\}\cap\{\text{retrieved documents}\}|}{|\{\text{retrieved documents}\}|}\ ,
+\end{equation}
+\begin{equation}
+    \text{recall} = \frac{|\{\text{evidence documents}\}\cap\{\text{retrieved documents}\}|}{|\{\text{evidence documents}\}|}\ ,
+\end{equation}
+\begin{equation}
+    \text{F1} = 
+    %\frac{2}{\frac{1}{\text{precision}}+\frac{1}{\text{recall}}} =
+    \frac{2\cdot\text{precision}\cdot\text{recall}}{\text{precision}+\text{recall}}\ ,
+\end{equation}
+\begin{equation}
+    \text{MRR} = \frac{1}{|Q|}\sum_{i=1}^{|Q|}{\frac{1}{\text{rank}_i}}\ ,
+\end{equation}
+where $Q$ is a set of queries and $\text{rank}_i$ is the rank of the first relevant document retrieved.
+
+Since precision and recall depend on the number $k$ of retrieved documents, we evaluate the models with varying $k$ and denote each evaluation with the suffix $\text{@}k$.

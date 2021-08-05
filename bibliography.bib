@@ -849,6 +849,131 @@ isbn="978-3-030-58323-1"
       primaryClass={stat.ML}
 }
 
+@misc{mrr,
+  author = {Ellen Voorhees},
+  title = {The Eighth Text REtrieval Conference (TREC-8)},
+  year = {2000},
+  month = {11},
+  pages = {77-82},
+  numpages = {6},
+  publisher = {Special Publication (NIST SP), National Institute of Standards and Technology, Gaithersburg, MD},
+  url = {https://doi.org/10.6028/NIST.SP.500-246},
+  language = {en},
+}
+
+@misc{czes,
+title = {czes},
+url = {http://hdl.handle.net/11858/00-097C-0000-0001-CCCF-C},
+note = {{LINDAT}/{CLARIAH}-{CZ} digital library at the Institute of Formal and Applied Linguistics ({{\'U}FAL}), Faculty of Mathematics and Physics, Charles University},
+copyright = {Attribution-{NonCommercial}-{NoDerivs} 3.0 Unported ({CC} {BY}-{NC}-{ND} 3.0)},
+year = {2011}
+}
+
+@misc{syn,
+title = {{SYN} v4: large corpus of written Czech},
+author = {K{\v r}en, Michal and Cvr{\v c}ek, V{\'a}clav and {\v C}apka, Tom{\'a}{\v s} and {\v C}erm{\'a}kov{\'a}, Anna and Hn{\'a}tkov{\'a}, Milena and Chlumsk{\'a}, Lucie and Jel{\'{\i}}nek, Tom{\'a}{\v s} and Kov{\'a}{\v r}{\'{\i}}kov{\'a}, Dominika and Petkevi{\v c}, Vladim{\'{\i}}r and Proch{\'a}zka, Pavel and Skoumalov{\'a}, Hana and {\v S}krabal, Michal and Trune{\v c}ek, Petr and Vond{\v r}i{\v c}ka, Pavel and Zasina, Adrian},
+url = {http://hdl.handle.net/11234/1-1846},
+note = {{LINDAT}/{CLARIAH}-{CZ} digital library at the Institute of Formal and Applied Linguistics ({{\'U}FAL}), Faculty of Mathematics and Physics, Charles University},
+copyright = {Czech National Corpus (Shuffled Corpus Data)},
+year = {2016}
+}
+
+@inproceedings{anserini1,
+author = {Yang, Peilin and Fang, Hui and Lin, Jimmy},
+title = {Anserini: Enabling the Use of Lucene for Information Retrieval Research},
+year = {2017},
+isbn = {9781450350228},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3077136.3080721},
+doi = {10.1145/3077136.3080721},
+abstract = {Software toolkits play an essential role in information retrieval research. Most open-source
+toolkits developed by academics are designed to facilitate the evaluation of retrieval
+models over standard test collections. Efforts are generally directed toward better
+ranking and less attention is usually given to scalability and other operational considerations.
+On the other hand, Lucene has become the de facto platform in industry for building
+search applications (outside a small number of companies that deploy custom infrastructure).
+Compared to academic IR toolkits, Lucene can handle heterogeneous web collections
+at scale, but lacks systematic support for evaluation over standard test collections.
+This paper introduces Anserini, a new information retrieval toolkit that aims to provide
+the best of both worlds, to better align information retrieval practice and research.
+Anserini provides wrappers and extensions on top of core Lucene libraries that allow
+researchers to use more intuitive APIs to accomplish common research tasks. Our initial
+efforts have focused on three functionalities: scalable, multi-threaded inverted indexing
+to handle modern web-scale collections, streamlined IR evaluation for ad hoc retrieval
+on standard test collections, and an extensible architecture for multi-stage ranking.
+Anserini ships with support for many TREC test collections, providing a convenient
+way to replicate competitive baselines right out of the box. Experiments verify that
+our system is both efficient and effective, providing a solid foundation to support
+future research.},
+booktitle = {Proceedings of the 40th International ACM SIGIR Conference on Research and Development in Information Retrieval},
+pages = {1253–1256},
+numpages = {4},
+keywords = {reproducibility, multi-threaded inverted indexing, trec test collections, open-source toolkits},
+location = {Shinjuku, Tokyo, Japan},
+series = {SIGIR '17}
+}
+
+@article{anserini2,
+author = {Yang, Peilin and Fang, Hui and Lin, Jimmy},
+title = {Anserini: Reproducible Ranking Baselines Using Lucene},
+year = {2018},
+issue_date = {November 2018},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {10},
+number = {4},
+issn = {1936-1955},
+url = {https://doi.org/10.1145/3239571},
+doi = {10.1145/3239571},
+abstract = {This work tackles the perennial problem of reproducible baselines in information retrieval
+research, focusing on bag-of-words ranking models. Although academic information retrieval
+researchers have a long history of building and sharing systems, they are primarily
+designed to facilitate the publication of research papers. As such, these systems
+are often incomplete, inflexible, poorly documented, difficult to use, and slow, particularly
+in the context of modern web-scale collections. Furthermore, the growing complexity
+of modern software ecosystems and the resource constraints most academic research
+groups operate under make maintaining open-source systems a constant struggle. However,
+except for a small number of companies (mostly commercial web search engines) that
+deploy custom infrastructure, Lucene has become the de facto platform in industry
+for building search applications. Lucene has an active developer base, a large audience
+of users, and diverse capabilities to work with heterogeneous collections at scale.
+However, it lacks systematic support for ad hoc experimentation using standard test
+collections. We describe Anserini, an information retrieval toolkit built on Lucene
+that fills this gap. Our goal is to simplify ad hoc experimentation and allow researchers
+to easily reproduce results with modern bag-of-words ranking models on diverse test
+collections. With Anserini, we demonstrate that Lucene provides a suitable framework
+for supporting information retrieval research. Experiments show that our system efficiently
+indexes large web collections, provides modern ranking models that are on par with
+research implementations in terms of effectiveness, and supports low-latency query
+evaluation to facilitate rapid experimentation},
+journal = {J. Data and Information Quality},
+month = oct,
+articleno = {16},
+numpages = {20},
+keywords = {TREC, Ad hoc retrieval}
+}
+
+@article{pyserini,
+  author    = {Jimmy Lin and
+               Xueguang Ma and
+               Sheng{-}Chieh Lin and
+               Jheng{-}Hong Yang and
+               Ronak Pradeep and
+               Rodrigo Nogueira},
+  title     = {Pyserini: An Easy-to-Use Python Toolkit to Support Replicable {IR}
+               Research with Sparse and Dense Representations},
+  journal   = {CoRR},
+  volume    = {abs/2102.10073},
+  year      = {2021},
+  url       = {https://arxiv.org/abs/2102.10073},
+  archivePrefix = {arXiv},
+  eprint    = {2102.10073},
+  timestamp = {Wed, 24 Feb 2021 15:42:45 +0100},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-2102-10073.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
 @article{distilbert,
   author    = {Victor Sanh and
                Lysandre Debut and
