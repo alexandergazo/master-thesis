@@ -1,6 +1,68 @@
 \chapter{Experiments}
 
-\section{Setup}
+\section{BM25}
+
+We used grid search for $k_1 \in [0.2,2.0]$, $b\in[0.1,1.0]$ with the step size of $0.1$, over training data.
+Only the entries labeled supported and refuted were used since only such entries provide evidence.
+We performed fine-tuning over whole training splits for both \CTK{} and FEVER CS datasets.
+% For the \CTK{} dataset, we performed the fine-tuning over the whole training split, while for the FEVER CS dataset, we randomly selected 10,000 verifiable claims from the training set.
+The resulting parameters were chosen according to the best recall achieved on the training data, calculated by summing up the difference between the best-achieved recall$@k$ and the configuration's recall$@k$.
+The monitored levels of the parameter $k$ were 1, 5, 10, 25, 50, 100, and 500. 
+The resulting values of the hyperparameters are displayed in Table \ref{tab:bm25_finetune}. 
+We note that the difference between the selected values and neighboring values was marginal (see Table \ref{tab:bm25_sets}). 
+%\begin{table}[!htb]
+    %\centering
+    %\begin{subtable}[t]{.47\textwidth}
+        %\centering
+        %\begin{tabular}{lrr}
+            %datset & $k_1$ & $b$ \\
+            %\midrule
+            %\CTK{} & 1.0 & 0.5 \\
+            %FEVER CS & 1.4 & 0.3
+        %\end{tabular}
+        %%\caption[BM25 Fine-tuned Parameters]{Fine-tuned parameters for BM25.}
+        %%\label{tab:bm25_finetune}
+    %\end{subtable}
+    %\hfill
+    %\begin{subtable}[t]{.47\textwidth}
+        %\centering
+        %\begin{tabular}{lcc}
+            %datset & $k_1$ & $b$ \\
+            %\midrule
+            %\CTK{} & [0.9, 1.1] & [0.4, 0.5] \\
+            %FEVER CS & [1.3, 1.5] & [0.3, 0.4]
+        %\end{tabular}
+        %%\caption[BM25 Promising Parameter Sets]{Neighbourhoods of parameter values with best results on the training sets.}
+        %%\label{tab:bm25_sets}
+    %\end{subtable}
+    %\caption[BM25 Parameter Selection]{Results of BM25 fine-tuning. \textbf{Left}: The selected fine-tuned parameters. \textbf{Right}: Neighbourhoods of parameter values with the best performance.}
+%\end{table}
+\begin{table}[!htb]
+    \centering
+    \begin{minipage}[t]{.47\textwidth}    
+        \centering
+        \begin{tabular}{lrr}
+            datset & $k_1$ & $b$ \\
+            \midrule
+            \CTK{} & 1.0 & 0.5 \\
+            FEVER CS & 1.4 & 0.3
+        \end{tabular}
+        \caption[BM25 Fine-tuned Parameters]{Fine-tuned parameters for BM25.}
+        \label{tab:bm25_finetune}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{.47\textwidth}
+        \centering
+        \begin{tabular}{lcc}
+            datset & $k_1$ & $b$ \\
+            \midrule
+            \CTK{} & [0.9, 1.1] & [0.4, 0.5] \\
+            FEVER CS & [1.3, 1.5] & [0.3, 0.4]
+        \end{tabular}
+        \caption[BM25 Promising Parameter Sets]{Neighbourhoods of parameter values with the best performance.}
+        \label{tab:bm25_sets}
+    \end{minipage}
+\end{table}
 
 \section{Results}
 \subsection{\CTK}
