@@ -121,6 +121,7 @@ As of writing, this figure is not final as the dataset needs to be manually clea
 
 \begin{figure}[h!]
     \begin{framed}
+        \vspace{-1mm}
         Paříž/Praha 2. června (ČTK) - Za vynikající kompletní nahrávku kvartetů Paula Hindemitha pro francouzskou firmu Harmonia Mundi obdrželo 3. června 1997 české Kocianovo kvarteto Velkou cenu francouzské Akademie Charlese Crose.
     \end{framed}
     \caption[\CTK{} Infobank Example]{\CTK{} infobank entry corresponging to the evidence id in Figure \ref{fig:ctk_example}.}
@@ -145,3 +146,35 @@ The results concluded that the original FEVER dataset contained simple negative 
 \label{subsec:data_leakage}
 
 As pointed out by \citet{ullrich}, the original FEVER dataset CONTAINS a not addressed quality -- at least 80 \% of verifiable dev claims share an evidence-set document with some train claim. The effects of this "leakage" are unknown and call for further research.
+
+\section{Knowledge Base Data Length}
+\label{sec:data_length}
+
+The above-discussed datasets are built upon two distinct knowledge bases, namely \CTK{} infobank and Czech Wikipedia.
+Note that \CTK{} infobank has been filtered from economic tables and sports news.
+The focus of this thesis is to explore the benefits of models supporting long inputs. 
+Figure \ref{fig:len_hist} depicts the resulting distribution of tokenized (using RobeCzech \citep{robeczech}) lengths of each of the knowledge bases:
+\begin{figure}[!htb]
+  \centering
+  \begin{subfigure}[t]{.49\textwidth}
+    \includegraphics[width=\linewidth]{cswiki_tok_len_hist.pdf}
+    \caption{Czech Wikipedia articles.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{.49\textwidth}
+    \includegraphics[width=\linewidth]{ctk_tok_len_hist.pdf}
+    \caption{Filtered \CTK{} articles.}
+  \end{subfigure}
+  \caption[Histograms of Tokenized Datasets Lengths]{Histograms of the tokenized documents' lengths of Czech Wikipedia and \CTK{}.}
+  \label{fig:len_hist}
+\end{figure}
+
+The histograms show that the standard input length of 512 tokens forces us to truncate $\approx$ 20\% of articles.
+Given the nature of the long documents in each knowledge base, namely:
+\begin{itemize}
+  \item the first paragraph of the Wikipedia articles is always the summary,
+  \item the long articles in \CTK{} infobank are either draft program statements of the government or news summary already contained in other articles,
+\end{itemize} and that the long documents 
+We can expect that the effect of extending the input might be marginal.
+Nonetheless, non-trivial information may still be truncated, and the lower time complexity of the models discussed in Section \ref{subsec:bertology} may produce positive results.
+
