@@ -2,17 +2,21 @@
 
 \section{Baselines}
 
-As the baseline, we have decided to use BM25, as proposed by \citet{weak-baselines}.
+As the traditional baseline, we have decided to use BM25, as proposed by \citet{weak-baselines}.
 We use the Pyserini\footnote{\url{https://github.com/castorini/pyserini/}} python toolkit for information retrieval \citep{pyserini} -- a python interface for the Anserini\footnote{\url{https://github.com/castorini/Anserini}} library \citep{anserini1, anserini2}, originally implemented in Java, building on the Lucene\footnote{\url{https://lucene.apache.org/}} library.
 The Pyserini library is a highly optimized library implementing multiple search algorithms.
+We also compare our results with the results achieved by \citet{rypar}, who researched document retrieval for documents up to one paragraph long ($\approx$ 230 tokens), using mBERT and ColBERT \citep{colbert} models.
 
 \section{Neural Models}
+
+Following the discussion in Section \ref{sec:data_length}, we have chosen the input length of the model to be 2048. 
+Given the resource-intensity of the task, we have chosen to test the \nystr{} model 
 
 \section{Evaluation Metrics}
 
 Document retrieval is best evaluated when dealing with evidence sets by the model's ability to match the evidence set with retrieved documents.
 By the retrieved documents, we mean the sequence of $k$ documents from the knowledge base with the highest scores.
-We can match the evidence set in multiple ways, motivating multiple measures of performance:
+We can match the evidence set in a variety of ways, motivating multiple measures of performance:
 \begin{itemize}
     \item \textbf{Precision} - We try to ``fit within'' the evidence set with retrieved documents.
     \item \textbf{Recall} - We try to ``cover'' the evidence set.
@@ -36,4 +40,5 @@ The specific formulas are:
 \end{equation}
 where $Q$ is a sequence of queries and $\text{rank}_i$ is the rank of the first relevant document retrieved for the query $q_i$.
 
+The most relevant metrics for us will be recall and MRR, since we aim to provide all the necessary knowledge ideally as the top results. 
 Since precision and recall depend on the number $k$ of retrieved documents, we evaluate the models with varying $k$ and denote each evaluation with the suffix $\text{@}k$.

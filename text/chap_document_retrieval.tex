@@ -4,16 +4,15 @@
 The term document retrieval refers to the task of finding relevant information to user queries in a large set of records (documents). 
 % Therefore, the document retrieval system operates over a database of records, which for this thesis are described in \ref{chap:data}.
 One can think of document retrieval as a search in a vast database of documents. 
-In this view, web search services, such as Google, are also a form of document retrieval. 
-In this case, the database of documents is all the accessible web pages on the internet.
+In this view, web search services, such as Google, are also a form of document retrieval, with the database of documents being all the accessible web pages on the internet.
 
-For our uses, the query is the claim to be fact-checked, and the document database is a collection of relevant documents, which we call knowledge base. 
+For our uses, the query is the claim to be fact-checked, and the document database is a collection of relevant documents, which we call the knowledge base. 
 
 In this chapter, we define the task of document retrieval and introduce traditional and novel (neural) approaches to solving it.
-After describing the traditional word-weighting approaches, we examine crucial concepts behind the used neural models.
-We then describe the framework which allows us to use the neural models on the document retrieval task.
-We then propose a way of applying the models to the document retrieval task.
-TODO -- remove one of the two previous sentences.
+After describing the traditional word-weighting approaches, we examine crucial concepts behind the proposed neural models.
+We then describe the framework which allows us to use the neural models for the document retrieval task.
+% We then propose a way of applying the models to the document retrieval task.
+% TODO -- remove one of the two previous sentences. -- zatial sa mi paci prva viac.
 
 \section{Formal Description}
 \label{sec:formal_descr_dr}
@@ -23,9 +22,9 @@ The task can be formally described \citep{two-tower} using a scoring function (s
         \label{eq:formal_descr_dr}
 \end{equation}
 that maps a document-query pair $(d, q)$ to a score $f(d,q)$. 
-Then, typically, the documents in pairs with the highest scores are considered to be the proposed solution to the task. 
+Then, given a query, the documents in the query-document pairs with the highest scores are considered to be the proposed solution to the task. 
 
-As mentioned above, this definition also fits descriptions of a range of other tasks such as open-domain question answering \citep{wiki-retrieval} or recommendation systems.
+As mentioned above, this definition also fits the descriptions of a range of other tasks such as open-domain question answering \citep{wiki-retrieval} or recommendation systems.
 
 \section{Approaches to Document Retrieval}
 
@@ -36,9 +35,9 @@ The organizers of the \textbf{T}ext \textbf{Re}trieval \textbf{C}onference (TREC
         \item Neural Networks -- others
 \end{itemize}
 We explore NNLM and traditional approaches, emphasizing the NNLM approach while using the latter as the baseline.
-The term ``Neural Networks'' is reserved for methods that use neural networks only in some parts of its implementation (such as word embeddings) and do not rely explicitly on language modeling.
+The term ``Neural Networks'' is reserved for methods that use neural networks only in some parts of its implementation (such as word embeddings, see Subsection \ref{subsec:wordemb}) and do not rely explicitly on language modeling.
 We do not explore such methods in this thesis, and therefore, by neural approach, we refer to the NNLM methods.
-While both work on entirely different principles, we will use both to generate an indexed version of the knowledge scope.
+While the two work on entirely different principles, we will use both to generate an indexed version of the knowledge scope.
 
 This chapter further introduces the most common document retrieval methods and new models with great potential while explaining the main points of the theoretical background.
 
@@ -49,18 +48,19 @@ Traditional approaches covered are weighting schemes, assigning a query-dependen
 \subsection{TFIDF}
 
 The traditional approaches are motivated by the intuition that relevant documents will contain the same words as those present in the query. 
-Longer documents are at an advantage since there is a higher chance of the relevant words being present, so the term count is often normalized by the number of all terms in the document.
+Longer documents are at an advantage since there is a higher chance of the relevant words being present.
+Therefore, the term count is often normalized by the number of all terms in the document.
 This simple metric is called term frequency (TF). 
 
 TF can be ineffective if some of the terms in the query are very common in the document database.
-This issue is resolved by introducing inverse document frequency, which informs how common the term is across all the documents.
+This issue is resolved by introducing inverse document frequency, which informs how common the term is across all documents.
 The base version of IDF:
 \begin{equation}
         \text{idf}(t, D)=\log{\frac{\abs{D}}{\abs{\{d\in D: t\in d\}}}}\ .
 \end{equation}
 
 % If we combine these two metrics
-Multiplying these two metrics, we get the TFIDF weight of term $t$ in document $d$ in document database $D$:
+Multiplying these two metrics, we get the TFIDF weighting scheme. The weight of term $t$ in document $d$ in document database $D$ is then
 \begin{equation}
         \text{tfidf}(t,d,D)=\text{tf}(t,d)\cdot\text{idf}(t,D)\ .
 \end{equation}
@@ -83,13 +83,13 @@ The intuitive formula for query score $f(q, d)$ is then
 \begin{equation}
         f_D(q, d)\approx\sum_{t \in q}\text{tfidf}(t, d, D)\ .
 \end{equation}
-TFIDF is called a weighting scheme precisely for this reason.
+Such a metric can be viewed as a weighting scheme. 
 
 Since % term frequency and therefore tfidf is zero when 
 $$t\notin d \hspace{1mm}\Rightarrow\hspace{1mm} \text{tf}(t, d) = 0 \hspace{1mm}\Rightarrow\hspace{1mm} \text{tfidf}(t, d, D) = 0\ ,$$
 we know that only words in the corpus' vocabulary are important, and thus we can precompute the TFIDF values for each document and word from the corpus' vocabulary.
 We obtain $|D|\times {vocabulary\_size}$ matrix $V$ of TFIDF values.
-%This formula can be improved -- in this form, it favors longer queries $q$. % DOES IT? TODO
+%This formula can be improved -- in this form, it favors longer queries $q$. % DOES IT? 
 %We can also precompute the TFIDF values for each document and vocabulary word in the corpus.
 %Thus we obtain $|D|\times {vocabulary\_size}$ matrix $V$ of TFIDF values.
 Here, to simplify length normalization, we normalize the matrix V so that each row has a unit norm.
@@ -103,9 +103,9 @@ We can obtain the scores for every query document pair by matrix multiplication:
 provided that matrix $V$ is row-normalized (euclidian norm of each row is equal to one).
 Please note that this is equivalent to computing the cosine similarity for each document and query vector pair.
 
-This function is one of the first and still widely used \citep{Beel2016} weighting schemes for document retrieval. 
+This function is one of the first and is still widely used \citep{Beel2016} weighting schemes for document retrieval. 
 
-Over the years, multiple versions of the TFIDF approach appeared, differing slightly in formulas or weights of the factors. One of such versions is Best Match 25. %questionable TODO
+Over the years, multiple versions of the TFIDF approach have appeared, differing slightly in formulas or weights of the factors. One of such versions is Best Match 25. %questionable TODO
 % maybe put the last sentence as the last sentence of the whole section
 
 \subsection{Best Match 25 (BM25)}
@@ -127,7 +127,7 @@ where $\text{c}(t,d)$ is the raw count of the term $t$ in the document $d$. $L_d
 The first term is IDF.
 The second term is TF with two tuning parameters $k_1$ and $b$. Parameter $k_1$ corresponds directly to TF scaling, while parameter $b$ corresponds to scaling by the inverse of the document's length.
 The third term follows the same idea as the second term, but the $b$ parameter equivalent is unnecessary since we only have one fixed query.
-It shows \citep{schutze2008introduction} that this term is only valid for longer queries $q$, such as whole paragraphs. 
+\citet{schutze2008introduction} note that this term is only useful for longer queries $q$, such as whole paragraphs. 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=.9\textwidth]{bm25.png}
@@ -136,18 +136,19 @@ It shows \citep{schutze2008introduction} that this term is only valid for longer
 
 Since this weighting scheme introduces tunable parameters, it can be trained on data. If the data is not available, \citet[Section 11.4.3]{schutze2008introduction} recommend using $k_1, k_3 \in [1.2;2]$ and $b=0.75$.
 
-%TODO problem with long documents - BM25+ http://sifaka.cs.uiuc.edu/~ylv2/pub/cikm11-lowerbound.pdf
+% problem with long documents - BM25+ http://sifaka.cs.uiuc.edu/~ylv2/pub/cikm11-lowerbound.pdf
 
 \subsubsection{Final Thoughts}
 
 Some of the apparent disadvantages of traditional approaches are the lack of semantic meaning that comes from the independence on the word order and the exact word matching. % independence???
 The former may be improved by using n-grams and the latter using character-level features instead of words, especially in inflected languages such as Czech.
 On the other hand, TFIDF is, to this day, a very well-performing low-computation cost ranking function, and as reported by \cite{weak-baselines}, BM25 (if tuned well) is still a solid baseline capable of beating even much more complex neural models.
+Fine-tuned BM25 was demonstrated\footnote{\url{https://github.com/castorini/anserini/blob/ad4caeb59ec512d0ce07412e6c4b873a8b841da4/docs/experiments-fever.md}} to outperform every document-retrieval submission from the original FEVER shared task \citep{fever-2018-shared-task}.
 
 \section{Neural Approaches}
 \label{sec:neural_approaches}
 
-Neural approaches using language modeling are models trained on predicting the correct word given some text before.  % maximizing the likelihood of correct word prediction in a text. 
+Neural approaches using language modeling are neural models that were trained to predict the correct word given a preceding text.  % maximizing the likelihood of correct word prediction in a text. 
 % More precisely, it is a conditional language modeling since the prediction also depends on provided input.
 Recurrent neural network (RNN) architecture was traditionally used for this task.
 The RNN was fed encoded tokenized input, returning a hidden state that was next fed into the RNN again along with the next input token's representation.
@@ -157,20 +158,12 @@ Intuitively, the vector contains the meaning of the original input.
 Such an approach is the Sequence to Sequence (seq2seq or encoder-decoder) model architecture \citep{seq2seq} with significant use-case in machine translation.
 
 As an improvement to the seq2seq models, the attention mechanism was introduced by \citet{first-attention}.
-The authors viewed the RNNs as a bottleneck to improving the model's performance.
+The authors viewed RNNs as a bottleneck to improving the architecture's performance.
 They proposed an automatic method of enriching parts of the input with other relevant parts of the input, eliminating the need to process the input as a whole.
-The attention mechanism is in-depth described in subsection \ref{subsec:attention}.
-
-% TODO check if this sits nicely
-\begin{figure}[b!]
-        \centering
-        \includegraphics[width=.5\textwidth]{transformer.png}
-        \caption[Transformer Model Architecture]{The transformer model architecture. Reprinted from \citep{attention-is-all-you-need}.}
-        \label{fig:transformer}
-\end{figure}
+The attention mechanism is in-depth described in Subsection \ref{subsec:attention}.
 
 The research paper ``Attention Is All You Need'' by \citet{attention-is-all-you-need} improved the RNN-based seq2seq by introducing the transformer architecture, depicted in Figure \ref{fig:transformer}, by substituting the RNN with multiple ``encoder blocks'', that is, attention layer and feedforward network with skip-connection. 
-This resulted in simpler architecture (RNN architectures tend to become very complex when trying to avoid the vanishing gradient problem), parallelization of the computation, and, most importantly, an improved performance. 
+This resulted in simpler architecture (RNN architectures tend to become very complex when trying to avoid the vanishing gradient problem \citep{vanishing-grad}), parallelization of the computation, and, most importantly, an improved performance. 
 The improvement showed that the attention mechanism was crucial to the past achievements of the seq2seq models, hence the paper's name.
 %On the other hand, the attention mechanism also introduces quadratic time complexity, which acts as a bottleneck in applications, where a longer input is required.
 %That is why the transformer models are generally used with fixed 512 token input length.
@@ -184,7 +177,7 @@ Then \textbf{B}idirectional \textbf{E}ncoder \textbf{R}epresentations from \text
 The model can then be fine-tuned on a specific task using a small amount of labeled data and one additional output layer. 
 
 This was a brief description of how a sequence of research papers -- ``Sequence to Sequence Learning with Neural Networks'' \citep{seq2seq}, ``Neural Machine Translation by Jointly Learning to Align and Translate'' \citep{first-attention}, ``Attention Is All You Need'' \citep{attention-is-all-you-need}, and ``BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding'' \citep{bert} -- led to a shift from RNN-based NLP approaches to, now SOTA, BERT-based approaches.
-This research focus is sometimes referred to as BERTology.
+The resulting research focus on BERT-based models is sometimes referred to as BERTology.
 
 In the following sections, we will explain the concepts mentioned above in greater detail.
 
@@ -192,11 +185,20 @@ In the following sections, we will explain the concepts mentioned above in great
 %The first was to predict random masked words, and the second classified whether the second sentence of two selected sentences immediately follows the first one.
 %It is a language modeling encoder capable of non-supervised learning 
 
+% TODO check if this sits nicely
+\begin{figure}[!htb]
+        \centering
+        \includegraphics[width=.5\textwidth]{transformer.png}
+        \caption[Transformer Model Architecture]{The transformer model architecture. Reprinted from \citep{attention-is-all-you-need}.}
+        \label{fig:transformer}
+\end{figure}
+
 \subsection{Word Vectors}
+\label{subsec:wordemb}
 
 Unlike traditional approaches, neural networks require numbers as their inputs.
 Therefore the words (tokens) have to be encoded into a numeric representation with a fixed length.
-The word encoding is just another linear layer (with $vocab\_size \times embedding\_dim$ weight matrix), which can be trained from scratch, or one could use pre-trained (for example \citep{glove}) word vectors (the rows of the matrix).
+The word encoding is just another linear layer (with $vocab\_size \times embedding\_dim$ weight matrix), which can be trained from scratch, or one could use pre-trained (for example \citep{glove}) word vectors (the rows of the weight matrix).
 
 \subsection{Attention Mechanism}
 \label{subsec:attention}
@@ -213,7 +215,7 @@ Then softmax is applied, and the result is used as the weights for the weighted 
   \label{eq:attention}
 \end{equation}
 Therefore, for every token, the result is the weighted average of all the value vectors, based on the similarity between the queries and the keys. 
-The result is called scaled dot-product attention.
+The result is called ``scaled dot-product attention''.
 
 The computation is performed multiple times in parallel with independent projection matrices to make the mechanism more robust.
 The results are then concatenated and projected into the final dimensionality.
@@ -255,28 +257,145 @@ The authors provide a detailed explanation in \citep[Section 3.5]{attention-is-a
 \end{figure}
 
 While seq2seq architecture can work with arbitrary sequence types, BERT is a language model working with text input. 
-Specifically, it is just the encoder part of the seq2seq architecture, meant for computing real-valued fixed-length vector representation of the input that can further be used by other neural models (usually shallow fully-connected feedforward networks).
+Specifically, it is just the encoder part of the seq2seq architecture, meant for computing real-valued fixed-length vector representation of the input tokens, that can further be used by other neural models (usually shallow, fully connected feedforward networks).
 The encoder is trained on a large amount of unlabeled text data (corpus) in a phase called pre-training.
-This phase, accounting for a great number of the model's parameters ($\approx$ 110 million in its base form), consumes a significant amount of power. 
+Due to a large number of the model's parameters ($\approx$ 110 million in its base form), this phase consumes a significant amount of power. 
 The model can then be fine-tuned, that is, trained for the task we want to apply it on, such as Named Entity Recognition (NER) \citep{ner}, Natural Language Inference (NLI) \citep{nli-bowman,nli-williams}, or Question Answering (QA) \citep{squad}. 
-This is done by usually adding one fully connected layer after the encoder output and relatively short training (of all parameters) with the usage of a smaller amount of labeled data. 
+This is usually done by adding one fully connected layer after the encoder output and relatively short training (of all parameters) with the usage of a smaller amount of labeled data. 
 
-Intuitively, the pre-training ``teaches'' the language and word meanings while the fine-tuning only ``explains'' the final task to the model.
+Intuitively, the pre-training ``teaches'' the language and word meanings to the model while fine-tuning only ``explains'' the final task to it.
+
+\subsection{Encoder Utilization in Document Retrieval}
+
+We have, so far, introduced the encoder model, but we have yet to describe how to use it in document retrieval. We can look at the neural-model-generated encodings in a way similar to the traditional approaches.
+
+Traditional approaches result in a sparse representation of the knowledge base with the feature dimensionality equal to the corpus's vocabulary size (the vocabulary can also contain n-grams or character n-grams if it is advantageous).
+Therefore, it can be considered a weighting scheme, assigning "importance" to each word present in the document. 
+% Neural approaches in this paper produce a dense representation -- a fixed-size vector of real numbers, inherently hard to interpret.
+
+Neural approaches in this paper generate a fixed-length real-valued vector representation for both the query and all the documents in the knowledge base.
+The dense representation is inherently hard to interpret, and the meaning can be derived only from the relative position of different documents' representations (vectors).
+Hence the $f(q,d)$ score from Equation \ref{eq:formal_descr_dr} is the distance between the vector representations of $q$ and $d$.
+The distance metric used may be cosine similarity, dot product, or a fast approximation such as FAISS \citep{faiss}.
+This approach allows us to preprocess the whole knowledge base, and thus during runtime, only the query representation needs to be computed.
+The disadvantage is that we do not utilize the attention mechanism to consider each query-document relation individually and, today less relevant problem, the need for additional space to store the precomputed representation.
+
+Neural models can also be used directly as the scoring function as in Equation \ref{eq:formal_descr_dr} and use the document-query pair $(d,q)$ as their input (the cross-attention model).
+This can, according to \citet{two-tower}, lead to better performance. However, since the query is provided at runtime, the evaluation cannot be precomputed and has to run for every document each time we enter a new query.
+Because of that, and because of the large number of documents in the knowledge base, this approach is unfit for real-world application.
+
+There exists a hybrid approach capable of utilizing the cross-attention model. 
+It runs the model on a small subset of the corpus, typically pre-selected by a non-neural model.
+The neural model only reranks the gathered sentences.
+Our colleague \citet{dedkova} provides a detailed look into the use of such methods in Czech document retrieval.
+
+% i did not mention it
+%As mentioned above, when dealing with natural language processing, we can approach the task in two different ways, both described in detail by \cite{two-tower}. 
+
+%USED ABOVE
+%The first is to have the document-query pair $(d,q)$ on the input of the neural model (cross-attention model).
+%One of the benefits is the direct usage of the neural model on the downstream tasks, possibly granting better performance.
+
+%USED ABOVE
+%The second approach generates a fixed-length real-valued vector representation for both the query and all the documents in the knowledge base.
+%Then the $f(q,d)$ score is the distance between $q$'s and $d$'s representation.
+%The distance metric used may be cosine similarity, dot product, or some approximation such as FAISS \citep{faiss}.
+
+%BLAH SOUNDS TOO SIMPLE The second approach is to preprocess the whole database of documents by the model and then using some metric for choosing the documents related to the query based on the computed representation.
+%The obvious advantage is the offline preprocessing and thus improved performance during inference.
+%Only the unseen query has to be processed by the neural model followed by computing the metric between the documents' representation and the query representation.
+%This approach grants significant speedup compared to computing the score for every query-document pair. 
+
+%USED ABOVE
+%We will be using the second approach since the number of documents in our knowledge base renders the cross-attention paradigm computationally unfit for real-world application.
+%  vymazat, 
+%In order to solve the document retrieval task, we will focus on finding an appropriate function $f$.
+%In this thesis, that means a function suitable for long documents.
+
+\subsubsection{Generating Representations}
+
+Generating the dense representations, also called embeddings since we project the input into a vector space with a specific dimension, is a well-studied area of research.
+We restrict ourselves to neural methods. 
+
+\begin{figure}[!htb]
+        \centering
+        \includegraphics[width=\textwidth]{sbert_architectures.png}
+        \caption[SBERT Architectures]{The left figure depicts SBERT architecture for classification, and the right depicts regression architecture. Both BERTs in each figure share their weights. Reprinted from \citep{sbert}.}
+        \label{fig:sbert_architectures}
+\end{figure}
+
+There are multiple ways to generate the input's embedding from the model-processed tokens.
+Sentence-BERT \citep{sbert} adds a pooling layer, either \texttt{MAX} or \texttt{MEAN}, and fine-tunes the model using two different approaches, depending on the task (see Figure \ref{fig:sbert_architectures}).
+They compare their method against averaging all the output tokens' representations, selecting the out representation of special input token \texttt{[CLS]} situated at the front of the input, and against averaging input tokens' GloVe \citep{glove} word vectors.
+The authors note that if the fine-tuning step is not performed, the BERT model provides little to no improvement to averaging input tokens' word vectors.
+
+The authors of \citep{two-tower} proposed a different approach, designed directly for document retrieval, in their case, over Wikipedia articles. 
+They apply a fully-connected linear layer to the \texttt{[CLS]} token's representation and also pre-train the BERT model on three additional document retrieval tasks:
+\begin{itemize}
+        \item \textbf{Inverse Cloze Task (ICT)} - Training the model to embed sentences close to the paragraph from which they were selected. The selected sentences are omitted from the paragraph in the training step.
+        \item \textbf{Body First Selection (BFS)} - Training the model to embed sentences close to the paragraphs in the same article. The sentences are selected in such a manner as to reasonably expect this task to succeed. In the case of training on Wikipedia, the sentences are selected from the first paragraph (summary).
+        \item \textbf{Wiki Link Prediction (WLP)} - Training the model to embed sentences close to Wikipedia articles from which there exists a hyperlink to the article of the sentence.
+\end{itemize}
+The authors reported significant improvements compared to using only MLM for the pre-training phase.
+% USED ABOVE They use the model's final representation of the special input token \verb{[CLS]}, situated at the front of the input, as the representation of the whole input. 
+
+\subsection{Language Support}
+
+The models described in previous sections are capable of multilingual learning.
+In representation learning, we strive to train models, which for two similar texts in different languages provide similar representations.
+Some \citep{cross-lingual} use additional training tasks utilizing parallel data to achieve this property.
+Multilingual models are expected not to outperform monolingual models.
+However, a large multilingual model XLM-RoBERTa (XLM-R) \citep{xlmr} was able to perform competitively with monolingual models on the English language, as well as on the Czech language \citep{mackova}.
+XLM-R performs well even without explicitly training on a multilingual task, using only unlabeled data.
+It was trained on a vast English corpus and one hundred small corpora in different languages. 
+\citet{cross-lingual} further confirm that training a model in this way provides competitive results.
+\citet{mackova} hypothesize that the greedy SGD forces the model to exploit existing similarities between the learned languages since by exploiting these similarities, the model saves its capacity allowing for better performance during training.
+Other recently introduced multilingual models are SlavicBERT \citep{deep-pavlov} -- tuned for NER and trained using Russian news and Bulgarian, Czech, Polish, and Russian Wikipedias -- and mBERT -- a BERT representation model trained on multilingual data.
+
+The available monolingual Czech models are RobeCzech \citep{robeczech} and Czert \citep{czert}, both language representation models based on BERT architecture.
+Authors of RobeCzech compare their model with other models mentioned in this section on five NLP tasks, claiming improvement over SOTA in all of them.
+
+As of this writing, we are not aware of pre-trained models supporting long inputs in the Czech language.
+In the next section, we present methods for utilizing pre-trained models without the need for training from scratch.
+
+\subsection{Distillation}
+\label{subsec:distillation}
+
+Knowledge distillation \citep{kw1, kw2} is a compression method in which we train a compact model (student) to mimic the predictions of a more complex model (teacher).
+The main idea is to feed both the teacher and the student the same input and training only the student using the error between the student's and the teacher's predictions as the objective function.
+The method has been successfully applied to various model ensembles, producing a single model able to perform competitively \citep{kw2}. 
+\citet{distilbert} apply the method to BERT, producing DistilBert -- a BERT model initialized from pre-trained BERT but only with half the number of layers.
+Trained DistilBERT retains 97\% of the original model's performance, according to the authors.
+
+\begin{figure}[!htb]
+        \centering
+        \includegraphics[width=.8\linewidth]{multilingual-distillation.png}
+        \caption[Multilingual Distillation]{Multilingual distillation training example on EN-DE parallel sentences. Reprinted from \citep{student-teacher}.}
+        \label{fig:multilingual_distillation}
+\end{figure}
+
+The method can also be utilized to teach new languages to a model using parallel language data, that is, a collection of the same sentences in multiple languages.
+\citet{student-teacher} propose ``multilingual distillation'' in which the teacher model is a well-performing monolingual representation model. 
+The teacher model is fed only sentences of its ``native'' language, while the student model is fed sentences in all the languages. 
+The student model is trained using the sum of all the losses over all the languages as the objective function.
+The process is depicted in Figure \ref{fig:multilingual_distillation}.
+The aim is to train the student model to generate the same representations of sentences with the same meaning, regardless of their written language.
 
 \subsection{Transformer's Computational Limits}
 
-While the benefits of the attention mechanism are undeniable \citep{attention-is-all-you-need}, on the other hand, it introduces quadratic time and space complexity by employing the ``one on one'' approach coupled with the non-linear softmax operation, which prevents various optimization techniques from being applied.
-That is why the attention mechanism acts as a bottleneck in applications, where a longer input is required.
-Transformer models, therefore, generally have the input length fixed to 512 tokens (shorter inputs are padded, longer truncated).
-That might be adequate for most applications, but in document retrieval, valuable information might get lost.
+While the benefits of the attention mechanism are undeniable \citep{attention-is-all-you-need}, the mechanism also introduces quadratic time and space complexity.
+This is the result of the ``one on one'' approach coupled with the non-linear softmax operation, which prevents various optimization techniques from being applied.
+The attention mechanism thus acts as a bottleneck in applications, where a longer input is required.
+Transformer models, therefore, generally limit the input length to 512 tokens, padding shorter inputs and truncating longer inputs.
+That might be adequate for most applications, but in document retrieval, valuable information might get lost (see Section \ref{sec:data_length}).
 
-Other parts of the transformer architecture too use a large amount of memory. During training, the activations of every encoder layer have to be stored for back-propagation. Feedforward layers in the encoder blocks are also nontrivially large.
+In addition, other parts of the transformer architecture consume a large amount of memory. During training, the activations of every encoder layer have to be stored for back-propagation, and feedforward layers in the encoder blocks are themselves nontrivially large.
 
 \subsection{BERTology}
 \label{subsec:bertology}
 
 The research focus on BERT-like models resulted in many papers introducing minor and major changes to the BERT's architecture.
-We will focus on modifying the attention mechanism so that longer inputs are no longer the limiting factor during computation.
+We will focus on modifying the attention mechanism so that longer inputs are not the limiting factor during computation.
 %We will focus on the ones modifying the attention mechanism in such a way that larger inputs are no longer the limiting factor during computation. 
 
 \subsubsection{Longformer}
@@ -289,8 +408,9 @@ Given multiple encoder blocks of the transformer architecture (Figure \ref{fig:t
 Additionally, a ``dilated'' window attention was used, where the window contains gaps of parametrized size. 
 The authors claim that using different sizes of dilation per attention head proved to be beneficial.
 
-In different applications the model performs better with different attention patterns and it might require that some positions attend to the whole input; for example, in question answering, it is essential to attend to the question.
-Thus, the authors use another set of projections in the attention mechanism (initialized from the windowed attention) called global attention.
+In different applications, the model performs better with different attention patterns.
+It might require that some positions attend to the whole input; for example, in QA, it is essential to attend to the question.
+Thus, the authors use another pattern in the attention mechanism.
 It arises by allowing some positions to attend to the whole input and making the whole input sequence attend to them, as in Figure \ref{fig:longformer_attention}.  %TODO check 
 
 % TODO check position
@@ -307,12 +427,9 @@ To utilize the benefits of this sparsified attention, the authors had to impleme
 
 The BigBird model \citep{bigbird} adopts a similar approach.
 The model also combines windowed and global attention with the addition of random attention.
-The random attention pattern is generated per input and in a way to attend to exactly $r$ tokens in one row. Again, the intuition is that thanks to the pattern of the attention matrix, the omitted parts are reachable in just a few layers deep.
+The random attention pattern is generated per input and in a way to attend to exactly $r$ tokens in one row. Again, the intuition is that thanks to the pattern of the attention matrix, the omitted parts are reachable in just a few layers.
 
-The authors prove theoretical guarantees for the model, namely that the attention pattern is able to approximate an arbitrary attention matrix.
-However, in the worst case, the number of layers needed is $m$, making the guarantee nonetheless rely on empirical evidence.
-
-\begin{figure}[!htb]
+\begin{figure}[!h]
         \centering
         %\includegraphics[width=\textwidth]{bigbird_attention.pdf}
         \begin{subfigure}{.22\textwidth}
@@ -339,32 +456,32 @@ However, in the worst case, the number of layers needed is $m$, making the guara
         \label{fig:bigbird_attention}
 \end{figure}
 
+The authors prove theoretical guarantees for the model, namely that the attention pattern is able to approximate an arbitrary attention matrix.
+However, in the worst case, the number of layers needed is $n$, making the guarantee nonetheless rely on empirical evidence.
+
 BigBird and Longformer both propose pattern-based attention, granting them $\bigO(n)$ complexity.
-However, they do introduce additional meta-parameters, which in order for the model to function perform on BERT's level, have to be set to large values. 
+However, they do introduce additional meta-parameters, which in order for the model to perform on BERT's level, have to be set to large values. 
 
 The paper also discusses techniques to make the computation of the patterns suitable for GPU, such as block-attention, where sparse tokens are ``enlarged'' to bigger blocks, and reshaping the final matrix to a rectangle shape.
 
 \subsubsection{Reformer}
 
-Reformer architecture \citep{reformer} offers two changes to the transformer model.
+The Reformer model \citep{reformer} offers two changes to the transformer model.
 The first is the usage of locality-sensitive hashing (LSH) \citep{lsh} in the attention mechanism, and the second is the use of reversible residual networks (RevNets) \citep{revnets}.
 
 The main idea behind the Reformer's attention is that softmax output from Equation \ref{eq:attention} is influenced most by the largest values of $QK^T$. 
 Since the output of $QK^T$ represents the dot products between the rows of $Q$ and $K$, the largest values are those, for which are the vectors from $Q$ and $K$ closest to each other.
 The problem of finding the closest vectors is still in $\bigO(n^2)$ since we need to compute the cosine distance between all the vector pairs -- we would need to compute $QK^T$ nonetheless. %??? TODO check grammar
 Here the authors utilize LSH for finding the closest vectors.
-Hash function $h(x)$ is locality-sensitive if it maps nearby vectors to the same hash with high probability. 
-The simplified base idea is that under random linear projections (randomly initialized matrix) into $n_{buckets}$ dimensional space, nearby vectors preserve their orientation, thus sharing the dimension index where they show the highest values.
+Hash function $h(x)$ is ``locality-sensitive'' if it maps nearby vectors to the same hash with high probability. 
+The simplified base idea is that under random linear projections into $n_{buckets}$ dimensional space (randomly initialized $n_{buckets}\times d$ matrix), nearby vectors preserve their orientation, thus sharing the dimension index where they show the highest values.
 Multiple random linear projections are performed in parallel to reduce the probability of similar vectors differing in the maximal indices.
-After the LSH computation is finished, each vector has been assigned to a ``bucket''.
+When the LSH computation is finished, each vector is assigned to a ``bucket''.
 Then the matrix $Q$ is sorted so that vectors from the same buckets are in a sequence.
 What follows is the computation of full attention, but only on parts of the sorted matrix.
 The parts are selected so that each bucket attends to all of the vectors in the bucket and one previous bucket, see Figure \ref{fig:reformer_buckets}.
 LSH does reduce attention computation time, but it introduces a large constant $c=n_{buckets}^2$ to the memory and time complexity since $n_{buckets}$ is typically 128.
 The authors also noted that setting $Q=K$ did not negatively impact the model's performance, and therefore LSH is applied only to the matrix $Q$.
-
-Another way to look at the LSH bucketing is to compute the dot product of the input vectors with a sequence of $\dfrac{n_{buckets}}{2}$ random vectors followed by their negative counterparts of the same dimension as the input vectors.
-Since cosine-similar vectors produce the highest values of dot products, we can be confident that vectors are similar if they shared the highest dot product values with the same random vectors even after multiple rounds of these projections.
 
 \begin{figure}[!htb]
         \centering
@@ -373,8 +490,11 @@ Since cosine-similar vectors produce the highest values of dot products, we can 
         \label{fig:reformer_buckets}
 \end{figure}
 
-In order to reduce the memory complexity, the Reformer model applies three methods.
-The first one is the use of RevNets \citep{revnets} discarding the need for storing layers' activations (Figure \ref{fig:revnets}). The second one is the use of ``chunking'' -- feeding only ``chunks'' of input at a time through the linear layers.
+Another way to look at the LSH bucketing is to compute the dot product of the input vectors with a sequence of $\dfrac{n_{buckets}}{2}$ random vectors and their negative (oppositely-facing) counterparts, with the same dimension as the input vectors.
+Since cosine-similar vectors produce the highest values of dot products, we can be confident that vectors are similar if they shared the highest dot product values with the same random vectors.
+
+In order to reduce the memory complexity, the Reformer model applies three different methods.
+The first one is the use of RevNets \citep{revnets} discarding the need for storing layers' activations during training (Figure \ref{fig:revnets}). The second one is the use of ``chunking'' -- feeding only ``chunks'' of input at a time through the linear layers.
 The last one is the swapping of the parameters of the currently unused layer from GPU to CPU. This would not be efficient in normal transformers, but since Reformer is able to work with inputs even 64,000 tokens long, the authors claim that ``the amount of compute done with the parameters amortizes the cost of their transfer.''
 
 \begin{figure}[!htb]
@@ -391,12 +511,12 @@ The last one is the swapping of the parameters of the currently unused layer fro
 \subsubsection{Linformer}
 
 Linformer model \citep{linformer} proposes a projection method to make the attention mechanism linear.
-The authors propose that the softmax part of the attention is low-rank, and therefore it is possible to perform an approximate calculation in lower dimensions. The theory stands on the distributional
+The authors hypothesize that the softmax part of the attention is low-rank, and therefore it is possible to perform an approximate calculation in lower dimensions. The theory stands on the distributional
 Johnson–Lindenstrauss lemma \citep{JL-lemma}, using its formulation from \citep{JL-formulation}. 
 It states that given $k\leq n$, a random gaussian projection from an $n$-dimensional space into $k$-dimensional space with zero-mean and $\frac{1}{k}$ standard deviation, preserves vectors' lengths and pairwise dot products with high probability.
 They prove that for the softmax part, the projection dimension $k$ can be set to $\min\{\Theta(9d\log(d)/\epsilon^2),5\Theta(\log(n)/\epsilon^2)\}$ while keeping the approximation error reasonably low \citep[Theorem 2]{linformer}.
 
-The projection matrices $E, F$ are in the proof defined as $E=\delta R, F=e^{-\delta}R$ for $R\in\R^{k\times n}$ with iid entries from $\mathcal{N}(0,\frac{1}{k})$ and a small constant $\delta$.
+The projection matrices $E, F$ are defined in the proof as $E=\delta R, F=e^{-\delta}R$ for $R\in\R^{k\times n}$ with iid entries from $\mathcal{N}(0,\frac{1}{k})$ and a small constant $\delta$.
 The attention mechanism itself is changed only by introducing non-trainable projection matrices when computing the keys and the values:
 \begin{equation}
         \text{LinAttn}(Q,K,V)=\text{Attention}(Q,EK,FV)=
@@ -421,7 +541,7 @@ attention mechanism’s low rank (see Figure \ref{fig:linformer_lowrank}).
 
 \subsubsection{Performer}
 
-Performer model \citep{performer} looks at the self-attention mechanism, concretely at the softmax substep $A=\exp(\frac{QK^T}{\sqrt{d}})$, as a randomized kernel function: 
+The Performer model \citep{performer} looks at the self-attention mechanism, specifically at the softmax substep $A=\exp(\frac{QK^T}{\sqrt{d}})$, as a randomized kernel function: 
 \begin{equation}
     A_{i,j}=K(q_i,k_j)=\mathbb{E}[\phi(q_i)^T\phi(k_j)]\ ,
 \end{equation}
@@ -448,16 +568,16 @@ The parameter $m$ does depend on the L2-norm of the queries and keys, the dimens
 Nystr\"omformer's \citep{nystrom} base idea is to approximate the attention computation by subsampling the original $Q$ and $K$ matrices and using a Nystr\"om-based method \citep{nystrom-matrix-approx} to approximate the full attention. 
 The subsampling is done by splitting the $Q$ and $K$ matrices into equally sized segments and then averaging each part into single vectors, calling them landmarks.
 
-The full attention matrix can be written as
+The attention computation can be written as
 \begin{equation}
         \text{Attention}(Q,K,V)=\text{softmax}\left(\frac{QK^T}{\sqrt{d}}\right)V=
         \begin{bmatrix}
-                A_S && B_S \\
-                F_S && C_S
+                A_S & B_S \\
+                F_S & C_S
         \end{bmatrix}V\ ,
 \end{equation}
 where $A_S\in\R^{m\times m}$ and other matrices are of appropriate shapes, with $m$ being the number of samples (landmarks). 
-The authors note that using \citep{nystrom-matrix-approx}, one could approximate the attention by expressing the matrix $C_S$ using the other matrices: $C_S=F_SA_S^\dagger B_S$. The $\dagger$ sign indicates the Moore-Penrose inverse.
+The authors note that using \citep{nystrom-matrix-approx}, one could approximate the attention by expressing the matrix $C_S$ using the other matrices as $C_S=F_SA_S^\dagger B_S$. The $\dagger$ sign indicates the Moore-Penrose inverse.
 
 Such usage of the Nystr\"om approximation will not help, as the samples can only be obtained after the attention matrix is computed -- the softmax operation needs the whole matrix $QK^T$ (or at least its rows). 
 Nevertheless, the authors do compute softmax over only the subsampled parts of the $QK^T$ matrix and use the resulting softmax-ed matrices to compute the approximated attention.
@@ -475,18 +595,6 @@ The final approximated attention is obtained by
         \ ,
 \end{equation}
 where $\sim$ indicates a subsampled matrix. The parenthesization ensures that the computation remains efficient. The final memory and time complexity is $\bigO(n)$, provided $m\ll n$.
-
-The only theoretical guarantee presented directly in the paper is that if the landmarks are equal to the original keys and queries, then the approximation converges to the true attention. 
-However, this holds trivially.
-Proper theoretical guarantees are located in the appended repository\footnote{\url{https://github.com/mlpen/Nystromformer/}}.
-There, the difference between true attention and the approximation is bounded by:
-\begin{equation}
-        ||\text{Attn}-\widehat{\text{Attn}}||_\infty\leq(1+||A^\dagger_S||_\infty+||A^\dagger_S-Z^*||_\infty)||V||_\infty\ ,
-\end{equation}
-where $||\cdot||_\infty$ is the maximum absolute column sum, and $Z*$ is the result of the GPU-compatible iterative algorithm \citep{iterative-moore} used by the authors to compute the Moore-Penrose inverse.
-The authors report good results on various tasks, even though the softmax operation is performed on submatrices only. 
-The adverse effects might be reduced by the fact that landmarks are calculated as segment means, and therefore, the original information is present during the softmax step.
-Figure \ref{fig:nystrom_example} provides an anecdotal comparison between full self-attention and the approximated attention.
 
 \begin{figure}[!htb]
         \centering
@@ -510,122 +618,18 @@ Figure \ref{fig:nystrom_example} provides an anecdotal comparison between full s
         \label{fig:nystrom_example}
 \end{figure}
 
+The only theoretical guarantee presented directly in the paper is that if the landmarks are equal to the original keys and queries, then the approximation converges to the true attention. 
+However, this holds trivially.
+Proper theoretical guarantees are located in the appended repository\footnote{\url{https://github.com/mlpen/Nystromformer/}}.
+There, the difference between true attention and the approximation is bounded by:
+\begin{equation}
+        ||\text{Attn}-\widehat{\text{Attn}}||_\infty\leq(1+||A^\dagger_S||_\infty+||A^\dagger_S-Z^*||_\infty)||V||_\infty\ ,
+\end{equation}
+where $||\cdot||_\infty$ is the maximum absolute column sum, and $Z*$ is the result of the GPU-compatible iterative algorithm \citep{iterative-moore} used by the authors to compute the Moore-Penrose inverse.
+The authors report good results on various tasks, even though the softmax operation is performed on submatrices only. 
+The adverse effects might be reduced by the fact that landmarks are calculated as segment means, and therefore, the original information is present during the softmax step.
+Figure \ref{fig:nystrom_example} provides an anecdotal comparison between full self-attention and the approximated attention.
+
 The authors note that thanks to the theoretical results from \citep{nystr-2017} and \citep{linformer}, even a small number of landmarks suffices to provide a good approximation.
-The first paper states that the error of the Nystr\"om approximation decreases with the matrix's rank.
-In the second paper, the authors suggest that the attention mechanism produces low-rank matrices.  
-
-\subsection{Encoder Utilization in Document Retrieval}
-
-We have, so far, introduced the encoder model, but we have yet to describe how to use it in document retrieval. We can look at the neural-model-generated encodings in a way similar to the traditional approaches.
-
-Traditional approaches result in a sparse representation of the knowledge base with the feature dimensionality equal to the corpus's vocabulary size (the vocabulary can also contain n-grams or character n-grams if it is advantageous).
-Therefore, it can be considered a weighting scheme, assigning "importance" to each word present in the document. 
-% Neural approaches in this paper produce a dense representation -- a fixed-size vector of real numbers, inherently hard to interpret.
-
-Neural approaches in this paper generate a fixed-length real-valued vector representation for both the query and all the documents in the knowledge base.
-The dense representation is inherently hard to interpret, and the meaning can be derived only from the relative position of different documents' representations (vectors).
-Hence the $f(q,d)$ score from Equation \ref{eq:formal_descr_dr} is the distance between the vector representations of $q$ and $d$.
-The distance metric used may be cosine similarity, dot product, or fast approximation such as FAISS \citep{faiss}.
-This approach allows us to preprocess the whole knowledge base, allowing us to compute only the query representation during runtime.
-The disadvantage is that we do not utilize the attention mechanism to consider each query-document relation individually and, today less relevant problem, the need for additional space to store the precomputed representation.
-
-Neural models can also be used directly as the scoring function as in Equation \ref{eq:formal_descr_dr} and use the document-query pair $(d,q)$ as their input (the cross-attention model).
-This can, according to \citet{two-tower}, lead to better performance. However, since the query is provided at runtime, the evaluation cannot be precomputed and has to run for every document each time we enter a new query.
-Because of that, and because of the large number of documents in the knowledge base, this approach is unfit for real-world application.
-
-There exists a hybrid approach capable of utilizing the cross-attention model. 
-It runs the model on a small subset of the corpus, typically pre-selected by a non-neural model.
-The model only reranks the gathered sentences.
-Our colleague \citet{dedkova} provides a detailed look into the use of such methods in Czech document retrieval.
-
-% i did not mention it
-%As mentioned above, when dealing with natural language processing, we can approach the task in two different ways, both described in detail by \cite{two-tower}. 
-
-%USED ABOVE
-%The first is to have the document-query pair $(d,q)$ on the input of the neural model (cross-attention model).
-%One of the benefits is the direct usage of the neural model on the downstream tasks, possibly granting better performance.
-
-%USED ABOVE
-%The second approach generates a fixed-length real-valued vector representation for both the query and all the documents in the knowledge base.
-%Then the $f(q,d)$ score is the distance between $q$'s and $d$'s representation.
-%The distance metric used may be cosine similarity, dot product, or some approximation such as FAISS \citep{faiss}.
-
-%BLAH SOUNDS TOO SIMPLE The second approach is to preprocess the whole database of documents by the model and then using some metric for choosing the documents related to the query based on the computed representation.
-%The obvious advantage is the offline preprocessing and thus improved performance during inference.
-%Only the unseen query has to be processed by the neural model followed by computing the metric between the documents' representation and the query representation.
-%This approach grants significant speedup compared to computing the score for every query-document pair. 
-
-%USED ABOVE
-%We will be using the second approach since the number of documents in our knowledge base renders the cross-attention paradigm computationally unfit for real-world application.
-% TODO vymazat, 
-%In order to solve the document retrieval task, we will focus on finding an appropriate function $f$.
-%In this thesis, that means a function suitable for long documents.
-
-\subsubsection{Generating Representations}
-
-Generating the dense representations, also called embeddings since we project the input into a vector space with a specific dimension, is, in general, a well-studied area of research.
-We restrict ourselves to neural methods described in Section \ref{sec:neural_approaches}. 
-
-\begin{figure}[!htb]
-        \centering
-        \includegraphics[width=\textwidth]{sbert_architectures.png}
-        \caption[SBERT Architectures]{The left figure depicts SBERT architecture for classification, and the right depicts regression architecture. Both BERTs in each figure share their weights. Reprinted from \citep{sbert}.}
-        \label{fig:sbert_architectures}
-\end{figure}
-
-There are multiple ways to generate the input's embedding from the model-processed tokens.
-Sentence-BERT \citep{sbert} adds a pooling layer, either \texttt{MAX} or \texttt{MEAN}, and fine-tunes the model using two different approaches, depending on the task (see Figure \ref{fig:sbert_architectures}).
-They compare their method against averaging all the output tokens' representations, selecting the out representation of special input token \texttt{[CLS]} situated at the front of the input, and against averaging input tokens' GloVe \citep{glove} word vectors.
-The authors note that if the fine-tuning step is not performed, the BERT model provides little to no improvement to averaging input tokens' word vectors.
-
-The authors of \citep{two-tower} proposed a different approach, designed directly for document retrieval, in their case, over Wikipedia articles. 
-They apply a fully-connected linear layer to the \texttt{[CLS]} token's representation and also pre-train the BERT model on three additional document retrieval tasks:
-\begin{itemize}
-        \item \textbf{Inverse Cloze Task (ICT)} - Training the model to embed sentences close to the paragraph from which they were selected. The selected sentences are omitted from the paragraph in the training step.
-        \item \textbf{Body First Selection (BFS)} - Training the model to embed sentences close to the paragraphs in the same article. The sentences are selected in such a manner to reasonably expect this task to succeed. In the case of training on Wikipedia, the sentences are selected from the first paragraph (summary).
-        \item \textbf{Wiki Link Prediction (WLP)} - Training the model to embed sentences close to Wikipedia articles from which there exists a hyperlink to the article of the sentence.
-\end{itemize}
-The authors reported significant improvements compared to using only MLM for the pre-training phase.
-% USED ABOVE They use the model's final representation of the special input token \verb{[CLS]}, situated at the front of the input, as the representation of the whole input. 
-
-\subsection{Language Support}
-
-The models described in previous sections are capable of multilingual learning.
-In representation learning, we strive to train models, which for two similar texts in different languages provide similar representations.
-Some \citep{cross-lingual} use additional training tasks utilizing parallel data to achieve this property.
-Multilingual models are expected not to outperform monolingual models.
-However, a large multilingual model XLM-RoBERTa (XLM-R) \citep{xlmr} was able to perform competitively with monolingual models on the English language, as well as on the Czech language \citep{mackova}.
-XLM-R performs well even without explicitly training on a multilingual task, using only unlabeled data.
-It was trained on a vast English corpus and one hundred small corpora in different languages. 
-\citet{cross-lingual} further confirm that training a model in this way provides competitive results.
-\citet{mackova} hypothesize that the greedy SGD forces the model to exploit existing similarities between the learned languages since by exploiting these similarities, the model saves its capacity allowing for better performance during training.
-Other recently introduced multilingual models are SlavicBERT \citep{deep-pavlov} -- tuned for NER and trained using Russian news and Bulgarian, Czech, Polish, and Russian Wikipedias -- and mBERT -- a BERT representation model trained on multilingual data.
-
-The available monolingual Czech models are RobeCzech \citep{robeczech} and Czert \citep{czert}, both language representation models based on BERT architecture.
-Authors of RobeCzech compare their model with other models mentioned in this section on five NLP tasks, claiming improvement over SOTA in all of them.
-
-As of writing, we are not aware of pre-trained models supporting long inputs in the Czech language.
-In the next section, we present methods for utilizing pre-trained without the need for training from scratch.
-
-\subsection{Distillation}
-\label{subsec:distillation}
-
-Knowledge distillation \citep{kw1, kw2} is a compression method in which we train a compact model (student) to mimic the predictions of a more complex model (teacher).
-The main idea is to feed both the teacher and the student the same input and training only the student using the error between the student's and the teacher's predictions as the objective function.
-The method has been successfully applied to various model ensembles, producing a single model able to perform competitively \citep{kw2}. 
-\citet{distilbert} apply the method to BERT, producing DistilBert -- a BERT model initialized from pre-trained BERT but only with half the number of layers.
-Trained DistilBERT retains 97\% of the original model's performance, according to the authors.
-
-\begin{figure}[!htb]
-        \centering
-        \includegraphics[width=.8\linewidth]{multilingual-distillation.png}
-        \caption[Multilingual Distillation]{Multilingual distillation training example on EN-DE parallel sentences. Reprinted from \citep{student-teacher}.}
-        \label{fig:multilingual_distillation}
-\end{figure}
-
-The method can also be utilized to teach a new language to a model using parallel language data, that is, a collection of the same sentences in multiple languages.
-\citet{student-teacher} propose ``multilingual distillation'' in which the teacher model is a well-performing monolingual representation model. 
-The teacher model is fed only sentences of its ``native'' language, while the student model is fed sentences in all the languages. 
-The student model is trained using the sum of all the losses over all the languages as the objective function.
-The process is depicted in Figure \ref{fig:multilingual_distillation}.
-The aim is to train the student model to generate the same representations of sentences of the same meaning, regardless of their written language.
+The first paper states that the Nystr\"om approximation error decreases with the matrix's rank.
+In the second paper (Linformer), the authors suggest that the attention mechanism produces low-rank matrices.  

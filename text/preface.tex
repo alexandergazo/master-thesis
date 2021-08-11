@@ -2,11 +2,11 @@
 \addcontentsline{toc}{chapter}{Introduction}
 \section*{Motivation}
 At its early stages, the internet was envisioned to become the pinnacle of joint human effort to gather and easily retrieve expert knowledge on virtually any topic.
-However, with many laypeople connected to the internet, extensive and aggressive advertising, and adversarial agents such as foreign powers or simply malicious individuals, the information on the internet is becoming harder to be trusted in the current state of affairs.
-The information overload created by these agents results in an 'opaque' state of the internet, where relevant, accurate information is hard to find in the mass of similarly sounding, non-professional written sources.
-Manually fact-checking the claims, therefore, becomes very expensive and time-consuming - bordering with unfeasible.
-Nevertheless, multiple projects focused on fact-checking emerged. 
-Various platforms such as Instagram\footnote{\url{https://about.fb.com/news/2018/05/hard-questions-false-news/}} and Twitter\footnote{\url{https://blog.twitter.com/en_us/topics/product/2021/introducing-birdwatch-a-community-based-approach-to-misinformation}} incorporated fact-checking mechanisms, mainly on viral or politicians' posts. 
+However, with many laypeople connected to the internet, extensive and aggressive advertising, and adversarial agents such as foreign powers or simply malicious individuals, the information on the internet is becoming harder to be trusted.
+The information overload created by these agents results in an ``opaque'' state of the internet, where relevant and accurate information is hard to find in the mass of similarly sounding, non-professionally written sources.
+Fact-checking the claims manually, therefore, becomes very expensive and time-consuming - bordering on unfeasible.
+Nevertheless, multiple projects focused on fact-checking have emerged. 
+Various platforms such as Instagram\footnote{\url{https://about.fb.com/news/2018/05/hard-questions-false-news/}} and Twitter\footnote{\url{https://blog.twitter.com/en_us/topics/product/2021/introducing-birdwatch-a-community-based-approach-to-misinformation}} have incorporated fact-checking mechanisms, mainly on viral post and posts of politicians. 
 
 In Czechia and the Slovak Republic, a popular project is Demagog\footnote{\url{https://demagog.cz}}, whose goal is to verify politicians' claims.
 The claim verification is carried out manually using primary sources. 
@@ -30,7 +30,7 @@ Automatic fact-checking should not be thought of as the miracle cure to the fake
 \section*{AI in Journalism}
 
 This thesis is one of the multiple theses written by the fact-checking team at ČVUT, led by Ing. Jan Drchal, Ph.D., as part of the AI in Journalism project, supported by the Transformation of Journalisms Ethics in the Advent of Artificial Intelligence (TL02000288)\footnote{\url{https://starfos.tacr.cz/cs/project/TL02000288}} grant from the Technology Agency of the Czech Republic.
-Our team focuses on creating a Czech fact-checking dataset from the ground up and developing usable Czech models for the fact-checking task, inspired by FEVER \citep{fever} and \citet{danish_fever}.
+Our team focuses on creating a Czech fact-checking dataset from the ground up, and developing usable Czech models for the fact-checking task, inspired by FEVER \citep{fever} and \citet{danish_fever}.
 The dataset is based on Czech news articles provided in cooperation with the Czech News Agency\footnote{Česká Tlačová Agentúra (ČTK)} -- we refer to the completed dataset as the ČTK dataset. 
 Our colleague \citet{ullrich} describes the creation of the ČTK dataset, which consisted of building a Czech annotation platform, working with annotators (students of the Faculty of Social Sciences at Charles University, one of our partners), and analyzing and cleaning up the gathered data.
 The works from colleagues \citet{dedkova} and \citet{rypar} deal with various aspects of document retrieval -- the use of hybrid (multi-stage) models and the performance of different embedding paradigms, respectively.
@@ -38,24 +38,23 @@ The works from colleagues \citet{dedkova} and \citet{rypar} deal with various as
 \section*{Transformer Models}
 
 The original transformer architecture \citep{attention-is-all-you-need} and BERT-model \citep{bert} are based on feeding fully-connected feed-forward networks with token representations aggregated from the whole text, meaning that the information from the input tokens (words or subwords) is adjusted according to their whole context. 
-This mechanism, named attention by the authors \citep{attention-is-all-you-need}, ``attending'' to all the input tokens for every input token, introduces quadratic time complexity. 
-The input of BERT is thus limited to 512 tokens as a design choice.
+This mechanism, named ``attention'' by the authors \citep{first-attention}, introduces quadratic time complexity by ``attending'' to all the input tokens for each input token.
+The input of BERT is thus usually limited to 512 tokens as a design choice.
 Working with this restriction, we decided to split the \CTK{} articles into paragraphs and perform document retrieval on them, theoretically losing joint article meaning.
 
-In this thesis, we explore this practice and compare it to BERT-based models with altered attention mechanisms such as \nystr{} \citep{nystrom}, Longformer \citep{longformer} and Reformer \citep{reformer}, allowing for longer inputs without increasing the computation cost, compromising in other areas.
+In this thesis, we study this practice and compare it to working with full articles using BERT-based models with altered attention mechanisms such as \nystr{} \citep{nystrom}, Longformer \citep{longformer} and Reformer \citep{reformer}.
+The changes allow for longer inputs without increasing the computation cost, compromising in other areas.
 
 \section*{Thesis Outline}
 
 This thesis focuses on the document retrieval part of the fact-checking pipeline.
-Specifically, it deals with models suitable for processing long Czech documents (news articles) since most BERT-based NLP models work with input sizes limited to 512 tokens, which might not be adequate.
-We focus precisely on these, but with changes to the attention mechanism allowing for longer inputs.
+Specifically, it deals with models suitable for processing long Czech documents.
 
-The first chapter deals with fact-checking and 
-In the first chapter, we define all the necessary background knowledge, 
-
-In Chapter \ref{chap:docret}, we formally define document retrieval, introduce methods that are already in use, and methods that we will be exploring further in this thesis. 
-% In the next chapter (Chapter \ref{chap:data}), I describe in-depth the FEVER, its Czech-translated version, and the ČTK dataset.
-The FEVER dataset, its Czech-translated version, and the ČTK dataset are described in-depth in the next chapter (Chapter \ref{chap:data}).
+The first chapter deals with fact-checking as a formal task and the past advances in this field.
+The next chapter formally defines document retrieval and introduces traditional as well as novel approaches. 
+% The datasets created in the project are described in the third chapter, where t
+% In Chapter \ref{chap:docret}, we formally define document retrieval, introduce methods that are already in use, and methods that we will be exploring further in this thesis. 
+The FEVER dataset, its Czech-translated version, and the ČTK dataset are in-depth described in the third chapter.
+We also analyze the length of the documents upon which the datasets are built.
 % The before-mentioned datasets are in-depth described in the next chapter (Chapter \ref{chap:data}).
-The last chapter is dedicated to the results of TODO experiments with the models introduced in Chapter \ref{chap:docret}.
-TODO The models are compared against traditional baselines using various metrics.
+We dedicate the last two chapters to the proposed solutions and the results of the evaluation.

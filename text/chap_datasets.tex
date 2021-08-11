@@ -1,13 +1,12 @@
 \chapter{Datasets}
 \label{chap:data}
 
-% TODO was it really mentioned
 As mentioned, the primary dataset, usage-wise and inspiration-wise, was the FEVER dataset \citep{fever}.
-Deriving from \cite{fever} methods, we \citep{ullrich} were able to create our own FEVER-like database using Czech News Agency's infobank.
+Deriving from the authors' methods, we \citep{ullrich} were able to create our own FEVER-like database using Czech News Agency's infobank. In this chapter, we describe the FEVER dataset and the two datasets that our team has produced.
 
 \section{FEVER Dataset}
 
-\textbf{F}act \textbf{E}xtraction and \textbf{Ver}ification \citep{fever} dataset is a large-scale dataset based on Wikipedia articles.
+The \textbf{F}act \textbf{E}xtraction and \textbf{Ver}ification \citep{fever} dataset is a large-scale dataset based on Wikipedia articles.
 The dataset was created by extracting sentences (claims) from the English Wikipedia articles and classifying them by human annotators as Supported, Refuted, or NotEnoughInfo.
 If the claim is verifiable (Supported, Refuted), then the evidence, either single or multiple paragraphs or even articles proving or disproving the claim, is also recorded.
 The complete FEVER contains 185,445 annotated claims generated using 50,000 popular articles.
@@ -19,7 +18,7 @@ The negation used has to be non-trivial because simple negative words and phrase
 
 More complex claims were created by providing related Wikipedia articles (articles hyperlinked from the original article) as another source of information while mutating the claim.
 
-In the second step - annotation - the annotators were asked to label the generated claims and provide suggested evidence when needed.
+In the second step - annotation - the annotators were asked to label the generated claims and provide additional evidence when needed.
 The whole process was streamlined to not spend longer than five minutes on a single claim throughout all stages.
 
 The quality of the dataset was thoroughly tested in the paper.
@@ -77,9 +76,8 @@ Because of the large-scale usage of machine translation without the means for ro
 \section{\CTK}
 % nomenclature
 
-The basis for this dataset is the collection of Czech news articles provided in collaboration with the Czech News Agency. 
+The basis for the \CTK{} dataset is the collection of Czech news articles provided in collaboration with the Czech News Agency. 
 Inspired by \cite{fever} and \cite{danish_fever}, our colleague \cite{ullrich} created a Czech version of the claim extracting and labeling software tool\footnote{available at \url{https://fcheck.fel.cvut.cz/}} running over the ČTK infobank's articles. 
-%TODO insert image
 It was designed to be used by layman annotators, who were students of our partner - the Faculty of Social Sciences at Charles University.
 
 \begin{table}[h!]
@@ -96,8 +94,8 @@ It was designed to be used by layman annotators, who were students of our partne
 
 The dataset creation consisted of two harvests. 
 After reviewing the results of the first one, we were able to rewrite instructions in the tool to guide the annotators to create higher-quality claims and labels with fewer conflicts.
-The second harvest concluded with $\approx$ 3,500 labeled claims, with more than half being labeled two or more times. %TODO cite webpage
-As of writing, this figure is not final as the dataset needs to be manually cleaned and have conflicts resolved. 
+The second harvest concluded with $\approx$ 3,500 labeled claims, with more than half being labeled two or more times (see Figure \ref{fig:dashboard}).
+As of this writing, this figure is not final as the dataset needs to be manually cleaned and have conflicts resolved. 
 
 \begin{figure}[h!]
     \begin{framed}
@@ -130,13 +128,13 @@ As of writing, this figure is not final as the dataset needs to be manually clea
 \begin{figure}[h!]
   %\makebox[\textwidth][c]{{\includegraphics[width=16cm]{dashboard.pdf}}}
   \includegraphics[width=\textwidth]{dashboard.pdf}
-  \caption[Visualizations of Properties of the Collected Dataset]{Visualizations of various properties of the collected \CTK{} dataset. Figure reprinted from \citet{ullrich}.}
+  \caption[Visualizations of Properties of the Collected Dataset]{Visualizations of various properties of the collected \CTK{} dataset. Figure reprinted from \citep{ullrich}.}
   \label{fig:dashboard}
 \end{figure}
 
 \section{Data Quality}
 
-The claim mutation in FEVER and \CTK{} datasets can be a source of unintentional cues, which the model can use to "guess" the label without understanding the claim.
+The claim mutation in FEVER and \CTK{} datasets can be a source of unintentional cues, which the model can exploit to "guess" the label without understanding the claim.
 For example, \citet{fever} pointed out that their annotators had difficulties negating the claims beyond trivial negations.
 
 \citet{rypar} conducted a series of evaluations on the \CTK{} and FEVER CS datasets using dataset-weighted cue information (DCI), and cue productivity and coverage \citep{niven-probing}, inspired by \citet{derczynski-etal-2020-maintaining}.
@@ -145,7 +143,7 @@ The results concluded that the original FEVER dataset contained simple negative 
 \subsection{Data Leakage}
 \label{subsec:data_leakage}
 
-As pointed out by \citet{ullrich}, the original FEVER dataset CONTAINS a not addressed quality -- at least 80 \% of verifiable dev claims share an evidence-set document with some train claim. The effects of this "leakage" are unknown and call for further research.
+As pointed out by \citet{ullrich}, the original FEVER dataset contains an unaddressed quality -- at least 80 \% of verifiable dev claims share an evidence-set document with some train claim. The effects of this "leakage" are unknown and call for further research.
 
 \section{Knowledge Base Data Length}
 \label{sec:data_length}
@@ -169,12 +167,13 @@ Figure \ref{fig:len_hist} depicts the resulting distribution of tokenized (using
   \label{fig:len_hist}
 \end{figure}
 
-The histograms show that the standard input length of 512 tokens forces us to truncate $\approx$ 20\% of articles.
+The histograms show that the standard input length of 512 tokens forces us to truncate $\approx$ 20\% of Wikipedia articles. For the \CTK{} dataset, the evidence is paragraph based and therefore, the truncation affects only the overall context of the article.
 Given the nature of the long documents in each knowledge base, namely:
 \begin{itemize}
   \item the first paragraph of the Wikipedia articles is always the summary,
+  \item the most informative paragraphs of \CTK{} news articles are typically self-contained,
   \item the long articles in \CTK{} infobank are either draft program statements of the government or news summary already contained in other articles,
-\end{itemize} and that the long documents 
-We can expect that the effect of extending the input might be marginal.
-Nonetheless, non-trivial information may still be truncated, and the lower time complexity of the models discussed in Section \ref{subsec:bertology} may produce positive results.
+\end{itemize}
+we can expect that the effect of extending the input might be marginal.
+Nonetheless, non-trivial information may still be truncated, and thus by leveraging the lower time complexity of the models discussed in Section \ref{subsec:bertology}, we may produce positive results.
 

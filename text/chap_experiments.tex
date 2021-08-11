@@ -65,6 +65,199 @@ We note that the difference between the selected values and neighboring values w
 \end{table}
 
 \section{Results}
+
+Since the baseline models from \citet{rypar} were used for paragraph-level document retrieval, I have interpreted their predictions that predicted paragraph meant a whole article, and if a paragraph from the same article was predicted again, it was ommited and the whole sequence shifted forward. TODO proably dont use as i did not explain soft mrr. This turned out not to significantly change the performance of the model in any metric. We theorize, that it is due to the nature of the difference. Some articles did end up at the fro
+% FINETUNED
+% FEVER
+% model __@1    __@2    __@5    _@10    _@20	@500
+% PRE   0.31	0.20	0.10	0.06	0.03	0.0
+% REC   0.29	0.38	0.48	0.53	0.56	0.64
+% MRR   0.30	0.34	0.37	0.38	0.38	0.3
+% CTK
+% PRE   0.24	0.16	0.08	0.05	0.03	0.0
+% REC   0.24	0.30    0.39	0.46	0.54	0.8
+% MRR   0.21	0.24	0.26	0.27	0.27	0.28
+
+% \begin{table}[!htb]
+%     \centering
+%     \begin{tabular}{lrrrrrr}
+%         \toprule
+%             model   & P@1   & P@2	& P@5	& P@10	& P@20	& P@500 \\
+%         \midrule
+%             BM25 	& 31.13	& 20.36	& 10.41	& 5.80	& 3.09	& 0.14 \\ 
+%             mBERT 	& 63.88	& 40.59	& 19.09	& 10.21	& 5.31	& 0.23 \\
+%             ColBERT	& 67.25	& 38.74	& 17.41	& 9.16	& 4.76	& 0.21 \\
+%         \bottomrule
+%     \end{tabular}
+%     \caption[FEVER CS Precision]{FEVER CS Precision}
+% \end{table}
+% 
+% \begin{table}[!htb]
+% \centering
+% \begin{tabular}{lrrrrrr}
+%     \toprule
+%         model &    R@1 &    R@2 &    R@5 &   R@10 &   R@20 &  R@500 \\
+%     \midrule
+%          BM25 &  29.09 &  37.55 &  47.70 &  52.64 &  55.91 &  63.52 \\
+%         mBERT &  59.60 &  75.28 &  87.55 &  92.84 &  95.47 &  98.89 \\
+%       ColBERT &  62.59 &  71.81 &  80.41 &  84.02 &  86.95 &  94.21 \\
+%     \bottomrule
+% \end{tabular}    
+% \caption[FEVER CS Recall]{FEVER CS Recall}
+% \end{table}
+% 
+% \begin{table}[!htb]
+%     \centering
+%     \begin{tabular}{lrrrrrr}
+%     \toprule
+%        model &    F@1 &    F@2 &    F@5 &   F@10 &   F@20 &   F@500 \\
+%     \midrule
+%         BM25 &  30.07 &  26.41 &  17.09 &  10.44 &   5.86 &    0.29 \\
+%        mBERT &  61.66 &  52.74 &  31.34 &  18.40 &  10.06 &    0.45 \\
+%      ColBERT &  64.84 &  50.33 &  28.62 &  16.52 &   9.03 &    0.42 \\
+%     \bottomrule
+%     \end{tabular}
+%     \caption{FEVER CS F1 Score}
+%     \label{tab:fevercs_f1score}
+% \end{table}
+% 
+% \begin{table}[!htb]
+%     \centering
+%     \begin{tabular}{lrrrrrr}
+%         \toprule
+%            model &  M@1 &  M@2 &  M@5 &  M@10 &  M@20 &  M@500 \\
+%         \midrule
+%             BM25 &  29.92 &  34.30 &  37.23 &   37.99 &   38.22 &    38.37 \\
+%            mBERT &  56.18 &  63.87 &  67.68 &   68.48 &   68.75 &    68.84 \\
+%          ColBERT &  63.93 &  68.41 &  70.70 &   71.16 &   71.34 &    71.47 \\
+%         \bottomrule
+%         \end{tabular}
+%     \caption[FEVER CS MRR]{FEVER CS MRR}
+% \end{table}
+% 
+% \begin{table}[!htb]
+%     \centering
+%     \begin{tabular}{lrrrrrr}
+%         \toprule
+%            model &    P@1 &    P@2 &    P@5 &  P@10 &  P@20 &  P@500 \\
+%         \midrule
+%             BM25 &  24.33 &  15.57 &   8.03 &  4.79 &  2.85 &   0.18 \\
+%            mBERT &   9.80 &   7.66 &   5.33 &  3.64 &  2.54 &   0.42 \\
+%          ColBERT &  24.37 &  19.22 &  11.11 &  6.91 &  4.20 &   0.38 \\
+%         \bottomrule
+%         \end{tabular}
+%     \caption[\CTK{} Precision]{\CTK{} Precision}
+% \end{table}
+% 
+% \begin{table}[!htb]
+%     \centering
+%     \begin{tabular}{lrrrrrr}
+%         \toprule
+%            model &    R@1 &    R@2 &    R@5 &   R@10 &   R@20 &  R@500 \\
+%         \midrule
+%             BM25 &  24.15 &  29.51 &  38.54 &  45.61 &    54.15 &\bf{80.00}\\
+%            mBERT &   9.82 &  14.36 &  20.15 &  25.44 &    32.75 &    72.80 \\
+%          ColBERT &  24.43 &  34.26 &  43.58 &  48.61 &\bf{55.16}&    79.35 \\
+%         \bottomrule
+%         \end{tabular}
+%     \caption[\CTK{} Recall]{\CTK{} Recall}
+% \end{table}
+% 
+% \begin{table}[!htb]
+%     \centering
+%     \begin{tabular}{lrrrrrr}
+%     \toprule
+%        model &    F@1 &    F@2 &    F@5 &   F@10 &   F@20 &   F@500 \\
+%     \midrule
+%         BM25 &  24.24 &  20.39 &  13.29 &   8.67 &   5.41 &    0.36 \\
+%        mBERT &   9.81 &   9.99 &   8.43 &   6.37 &   4.71 &    0.83 \\
+%      ColBERT &  24.40 &  24.63 &  17.70 &  12.10 &   7.80 &    0.75 \\
+%     \bottomrule
+%     \end{tabular}
+%     \caption{\CTK{} F1 Score}
+%     \label{tab:ctk_f1score}
+% \end{table}
+% 
+% \begin{table}[!htb]
+%     \centering
+%     \begin{tabular}{lrrrrrr}
+%         \toprule
+%            model &  M@1 &  M@2 &  M@5 &  M@10 &  M@20 &  M@500 \\
+%         \midrule
+%             BM25 &  21.22 &  23.63 &  25.82 &   26.70 &   27.23 &    27.60 \\
+%            mBERT &  11.02 &  13.35 &  14.97 &   15.60 &   16.12 &    16.62 \\
+%          ColBERT &  23.31 &  28.07 &  30.32 &   31.09 &   31.51 &    31.93 \\
+%         \bottomrule
+%         \end{tabular}
+%     \caption[\CTK{} MRR]{\CTK{} MRR}
+% \end{table}
+
+\begin{table}[!htb]
+    \centering
+    \begin{tabular}{lrrrrrr}
+        \toprule
+           model &    P@1 &    P@2 &    P@5 &   P@10 &  P@20 &  P@500 \\
+        \midrule
+            BM25 &  31.13 &  20.36 &  10.41 &   5.80 &  3.09 &   0.14 \\
+           mBERT &  63.88 &  40.59 &  19.09 &  10.21 &  5.31 &   0.23 \\
+         ColBERT &  67.25 &  38.74 &  17.41 &   9.16 &  4.76 &   0.21 \\
+        \midrule
+           {}    &    R@1 &    R@2 &    R@5 &   R@10 &   R@20 &  R@500 \\
+        \midrule
+            BM25 &  29.09 &  37.55 &  47.70 &  52.64 &  55.91 &  63.52 \\
+           mBERT &  59.60 &  75.28 &  87.55 &  92.84 &  95.47 &  98.89 \\
+         ColBERT &  62.59 &  71.81 &  80.41 &  84.02 &  86.95 &  94.21 \\
+        \midrule
+           {}    &    F@1 &    F@2 &    F@5 &   F@10 &   F@20 &   F@500 \\
+        \midrule
+            BM25 &  30.07 &  26.41 &  17.09 &  10.44 &   5.86 &    0.29 \\
+           mBERT &  61.66 &  52.74 &  31.34 &  18.40 &  10.06 &    0.45 \\
+         ColBERT &  64.84 &  50.33 &  28.62 &  16.52 &   9.03 &    0.42 \\
+        \midrule
+           {}    &  M@1 &  M@2 &  M@5 &  M@10 &  M@20 &  M@500 \\
+        \midrule
+            BM25 &  29.92 &  34.30 &  37.23 &   37.99 &   38.22 &    38.37 \\
+           mBERT &  56.18 &  63.87 &  67.68 &   68.48 &   68.75 &    68.84 \\
+         ColBERT &  63.93 &  68.41 &  70.70 &   71.16 &   71.34 &    71.47 \\
+        \bottomrule
+        \end{tabular}
+    \caption[FEVER CS Metrics]{FEVER CS Metrics}
+\end{table}
+
+
+\begin{table}[!htb]
+    \centering
+    \begin{tabular}{lrrrrrr}
+        \toprule
+           model &    P@1 &    P@2 &   P@5 &  P@10 &  P@20 &  P@500 \\
+        \midrule
+            BM25 &  24.33 &  15.57 &  8.03 &  4.79 &  2.85 &   0.18 \\
+           mBERT &   9.80 &   7.41 &  4.07 &  2.56 &  1.63 &   0.18 \\
+         ColBERT &  24.37 &  17.09 &  8.69 &  4.87 &  2.76 &   0.19 \\
+        \midrule
+              {} &    R@1 &    R@2 &    R@5 &   R@10 &   R@20 &  R@500 \\
+        \midrule
+            BM25 &  24.15 &  29.51 &  38.54 &  45.61 &  54.15 &  80.00 \\
+           mBERT &   9.82 &  14.86 &  20.40 &  25.69 &  32.75 &  72.80 \\
+         ColBERT &  24.43 &  34.26 &  43.58 &  48.87 &  55.42 &  79.35 \\
+        \midrule
+              {} &    F@1 &    F@2 &    F@5 &   F@10 &   F@20 &   F@500 \\
+        \midrule
+            BM25 &  24.24 &  20.39 &  13.29 &   8.67 &   5.41 &    0.36 \\
+           mBERT &   9.81 &   9.89 &   6.79 &   4.66 &   3.11 &    0.36 \\
+         ColBERT &  24.40 &  22.80 &  14.50 &   8.86 &   5.27 &    0.38 \\
+        \midrule
+              {} &  M@1 &  M@2 &  M@5 &  M@10 &  M@20 &  M@500 \\
+        \midrule
+            BM25 &  21.22 &  23.63 &  25.82 &   26.70 &   27.23 &    27.60 \\
+           mBERT &  11.02 &  13.67 &  15.18 &   15.78 &   16.28 &    16.82 \\
+         ColBERT &  23.31 &  28.07 &  30.35 &   31.17 &   31.61 &    32.04 \\
+        \bottomrule
+        \end{tabular}
+    \caption[\CTK{} Metrics]{\CTK{} Metrics}
+\end{table}
+
+
 \subsection{\CTK}
 \subsection{FEVER CS}
 
