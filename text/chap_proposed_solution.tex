@@ -9,12 +9,28 @@ We also compare our results with the results achieved by \citet{rypar}, who rese
 
 \section{Neural Models}
 
-Following the discussion in Section \ref{sec:data_length}, we have chosen the input length of the model to be 2048. 
-Given the resource-intensity of the task, we have chosen to test the \nystr{} model 
+From the models described in Section \ref{subsec:bertology} only Longformer \citep{longformer}, BigBird \citep{bigbird} and Reformer \citep{reformer} are available in the HuggingFace Transformers library \citep{huggingface}, and none are trained in the Czech language. 
+
+We have chosen to experiment with BigBird and \nystr{}. 
+We chose BigBird over Longformer, as the BigBird architecture essentially performs the same way as Longformer. Another reason is that during experimentation with Longformer, we ran into scalability issues with embedding the documents.
+The time required to generate the representation of the entire Czech Wikipedia was estimated to take $\approx$ 300 hours (for the \CTK{} infobank $\approx 1500$ hours), despite using the authors' guide\footnote{\url{https://github.com/allenai/longformer/blob/caefee668e39cacdece7dd603a0bebf24df6d8ca/scripts/convert_model_to_long.ipynb}} and implementation.
+
+The Performer \citep{performer}, Linformer \citep{linformer}, and Reformer \citep{reformer} models, although promising, were shown to be outperformed by the \nystr{} model by its authors (see Appendix 2).
+Given the resource intensity of the task\footnote{linear slow-down in an ideal scenario means that for sequences of length 2048 or 4096 tokens the model nevertheless performs $\approx$ 8 to 16 times slower} and the lack of a unified code base, we have decided to follow the results and implement the \nystr{} model only.
+
+We tested three approaches to the task:
+
+\begin{enumerate}
+    \item Train the BigBird model using multilingual knowledge distillation as described in Section \ref{subsec:distillation} using the SBERT library \citep{sbert}.
+    \item Train \nystr{} on MLM task from RobeCzech \citep{robeczech} checkpoint using the provided code base\footnote{\url{https://github.com/mlpen/Nystromformer/}}.
+    \item As a soft baseline, evaluate the pre-trained RobeCzech model and SBERT-fine-tuned (see Figure \ref{fig:sbert_architectures}) RobeCzech model on the document retrieval task.  
+\end{enumerate}
+
+Following the discussion in Section \ref{sec:data_length}, we have chosen the input length of the long models to be 2048. 
 
 \section{Evaluation Metrics}
 
-Document retrieval is best evaluated when dealing with evidence sets by the model's ability to match the evidence set with retrieved documents.
+Document retrieval is best evaluated by the model's ability to match the evidence set with the retrieved documents.
 By the retrieved documents, we mean the sequence of $k$ documents from the knowledge base with the highest scores.
 We can match the evidence set in a variety of ways, motivating multiple measures of performance:
 \begin{itemize}
@@ -40,5 +56,5 @@ The specific formulas are:
 \end{equation}
 where $Q$ is a sequence of queries and $\text{rank}_i$ is the rank of the first relevant document retrieved for the query $q_i$.
 
-The most relevant metrics for us will be recall and MRR, since we aim to provide all the necessary knowledge ideally as the top results. 
+The most relevant metrics for us will be recall and MRR, since we aim to provide all the necessary knowledge, ideally among the first results.
 Since precision and recall depend on the number $k$ of retrieved documents, we evaluate the models with varying $k$ and denote each evaluation with the suffix $\text{@}k$.

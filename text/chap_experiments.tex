@@ -2,14 +2,14 @@
 
 \section{BM25}
 
-We used grid search for $k_1 \in [0.2,2.0]$, $b\in[0.1,1.0]$ with the step size of $0.1$, over training data.
+We used grid search for $k_1 \in [0.2,2.0]$, $b\in[0.1,1.0]$ with the step size of $0.1$, over the training splits.
 Only the entries labeled supported and refuted were used since only such entries provide evidence.
 We performed fine-tuning over whole training splits for both \CTK{} and FEVER CS datasets.
 % For the \CTK{} dataset, we performed the fine-tuning over the whole training split, while for the FEVER CS dataset, we randomly selected 10,000 verifiable claims from the training set.
 The resulting parameters were chosen according to the best recall achieved on the training data, calculated by summing up the difference between the best-achieved recall$@k$ and the configuration's recall$@k$.
 The monitored levels of the parameter $k$ were 1, 5, 10, 25, 50, 100, and 500. 
 The resulting values of the hyperparameters are displayed in Table \ref{tab:bm25_finetune}. 
-We note that the difference between the selected values and neighboring values was marginal (see Table \ref{tab:bm25_sets}). 
+We note that the difference between the selected values and neighboring values was insignificant (see Table \ref{tab:bm25_sets}). 
 %\begin{table}[!htb]
     %\centering
     %\begin{subtable}[t]{.47\textwidth}
@@ -64,9 +64,69 @@ We note that the difference between the selected values and neighboring values w
     \end{minipage}
 \end{table}
 
+\section{ColBERT and mBERT baselines}
+
+We used the ColBERT and mBERT models pre-trained and fine-tuned by \citet{rypar}.
+\citet{rypar} performed document retrieval on a paragraph level, and therefore to better compare the models quality in the context of this thesis, we modify the predicted sequences by substituting paragraphs with the document they originate from.
+The created duplicates in the predictions are omitted in a forward pass, starting from the top and deleting each article we have already encountered.
+The change in the resulting metric, however, turned out to be marginal.
+
+\section{\nystr{}}
+
+For \nystr, we used the compact containerized implementation published by the authors\footnote{\url{https://github.com/mlpen/Nystromformer/}}.
+The training was done using the MLM task on Czech data, namely Czech Wikipedia\footnote{\url{https://dumps.wikimedia.org/}}, a very large Czech corpus ``czes'' \citet{czes}, and the Corpus of contemporary written (printed) Czech ``SYN v4'' \citep{syn}. 
+The reason for such a large amount of data is that when using inputs of length 2048 tokens, we obtain a relatively small number of instances, and the fact that large corpora tend to produce better-performing models \citep{xlmr}.
+
+The model was not trained from scratch; instead, we used the pre-trained RobeCzech model as the starting point. RobeCzech's tokenizer was used, and all the weights, except for the attention mechanism, were initialized as a copy of RobeCzech's weights.
+However, we had to address an issue regarding RobeCzech's tokenizer, where the size of the word in its vocabulary was greater than the number of possible tokens. 
+This initialization proved to increase the speed of training.
+The issue occurred as the vocabulary mapped multiple tokens to \texttt{[UNK]}, a token representing unknown values.
+Using a simple wrapper, which returned the correct vocabulary size, around the tokenizer resolved the issue.
+
+The training itself was performed for 3000 steps on four Tesla V100-SXM2-32GB graphics cards, batch size 8, embedding dimension 768, landmark count 512, and a decaying learning rate 8e-5. Figure \ref{fig:nystr_training} shows that for \nystr{}, the training does not significantly slow down after increasing the input length.
+
+\begin{figure}[!htb]
+    \centering
+    \begin{minipage}{.49\textwidth}
+        \includegraphics[width=\textwidth]{nystr-train-mlm.png}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{.49\textwidth}
+        \includegraphics[width=\textwidth]{nystr-train-loss.png}
+    \end{minipage}
+    \caption[\nystr{} Training]{Comparison of the speed of training for two different input lengths. The experimental setup is the same except for doubled batch size and 1.6 times higher learning rate for the shorter-input model.}
+    \label{fig:nystr_training}
+\end{figure}
+
+After training, we applied mean-pooling over generated token embeddings to generate the final representations.
+
+\section{BigBird}
+
+We have used the pre-trained BigBird model along with its implementation from the HuggingFace Transformers library \citep{huggingface}. 
+We applied multilingual knowledge distillation as described in Section \ref{subsec:distillation} using the SBERT library \citep{sbert}. 
+Both the teacher and the student model were initialized as the pre-trained BigBird model.
+The training was performed using sentence-parallel Czech-English corpus Czeng 2.0 \citep{czeng2.0}. 
+The corpus contains human-translated sentences in both the Czech and the English languages. 
+After training for 25 mini-epochs on a single V100 GPU, with a learning rate of 2e-5, and a beth size of 16, the evaluation error stopped decreasing.
+
+The second stage was the training of representation generation, described in Section \ref{subsub:genrep}, again using SBERT.
+The model was tasked with generating similar or dissimilar representations of sentences in the Stanford Natural Language Inference (SNLI) Corpus \citep{snli}, depending on the label.
+The dataset consists of pairs of sentences labeled \texttt{entailment}, \texttt{contradiction}, and \texttt{neutral}.
+The training was performed for 30 epochs.
+
+We theorize that it would be beneficial to train the model on longer inputs than single sentences since BigBird, with its long input capability, cannot train the weights corresponding to the farther parts of the input.
+Chaining multiple sentences together from the Czeng 2.0 dataset would not be helpful, as the sentences rarely form a large block of coherent text.
+We would thus need a large parallel dataset with whole works translated.
+We are, however, not aware of such a Czech-English dataset.
+
+\section{RobeCzech Baseline}
+
+As a simple baseline we decided to apply the above mentioned method of ``entailment training'' on the SNLI dataset to the RobeCzech model.
+We performed the exact same training as the second stage of BigBird training.
+
 \section{Results}
 
-Since the baseline models from \citet{rypar} were used for paragraph-level document retrieval, I have interpreted their predictions that predicted paragraph meant a whole article, and if a paragraph from the same article was predicted again, it was ommited and the whole sequence shifted forward. TODO proably dont use as i did not explain soft mrr. This turned out not to significantly change the performance of the model in any metric. We theorize, that it is due to the nature of the difference. Some articles did end up at the fro
+
 % FINETUNED
 % FEVER
 % model __@1    __@2    __@5    _@10    _@20	@500
@@ -257,8 +317,9 @@ Since the baseline models from \citet{rypar} were used for paragraph-level docum
     \caption[\CTK{} Metrics]{\CTK{} Metrics}
 \end{table}
 
-
 \subsection{\CTK}
 \subsection{FEVER CS}
 
 \section{Discussion}
+
+Due to non-compatible codebases of different implementations, resource-intesivity of the task, which also 
