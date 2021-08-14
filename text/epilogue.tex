@@ -6,22 +6,26 @@ We explained the motivation for studying the topic and proposed using new neural
 Our research team created the first fact-checking dataset in the Czech language \citep{ullrich} and explored different models' architectures capable of good performance.
 Inspired by the FEVER pipeline \citep{fever} (see Figure \ref{fig:pipeline}), we split the problem into two distinct tasks -- document retrieval and natural language inference.
 
-We further dealt with document retrieval.
+This thesis further dealt with document retrieval.
 We first defined the task formally and then introduced well-established traditional techniques for the task.
 Then followed a brief description of the progress from RNN-based language models to transformers \citep{attention-is-all-you-need} and BERT \citep{bert}.
 Since the BERT model as described in \citep{bert} and as adopted across the research field performs best for inputs up to 512 tokens, we were forced to work over paragraphs instead of the whole documents. 
 Our colleagues \citep{rypar} and \citep{dedkova} have studied this type of document retrieval.
 
-This thesis explored whether we could improve retrieval performance by utilizing whole articles. 
+In this thesis, we explored whether we could improve retrieval performance by utilizing whole articles. 
 We provided a summary of currently available papers regarding transformer language models supporting long inputs, namely Longformer, BigBird, Reformer, Linformer, Performer, and \nystr{}.
 Since no pre-trained models for the Czech language were available, we either trained them from scratch or utilized the student-teacher method \citep{student-teacher} described in Section \ref{subsec:distillation}.
 Lastly, we compared the traditional, short-input, and long-input approaches in the document retrieval task and analyzed the results.
 
-The resulting models turned out not to outperform classic BERT with paragraph-level splitting, but TODO.
+The explored models turned out not to outperform the traditional and the paragraph-level retrieval baselines. However, we highlighted the importance of SBERT-like fine-tuning and displayed its usefulness even for originally monolingual English models.
+
+The main dataset of this work, \CTK{} dataset, and the \CTK{} infobank still pose a significant challenge to the document retrieval task, with the best models performing on-par with a simple, accurate-based baseline.
 
 \subsubsection{Future Work}
 
 As time progresses, automatic fact-checking will be needed more and more.
-With the joint effort across the machine learning research field, we hope to train better TODO.
+With the joint effort across the machine learning research field, we hope to train better NLP neural models focusing on unstructured and news-like data.
 We wish to continue improving the created \CTK{} dataset and to now focus on the natural language inference task of the fact-checking pipeline. 
-Neural language models supporting long inputs are an exciting developing area of machine learning and, in the future, might provide a significant benefit in fast searching through large databases of documents.
+
+Regarding long-input models, we would like to focus on applying representation fine-tuning to the models, as well as exploring the ICT pre-training task as suggested by \citet{two-tower}.
+Neural language models supporting long inputs are an exciting developing area of machine learning, and in the future, they might provide a significant benefit in fast searching through large databases of documents.

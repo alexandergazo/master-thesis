@@ -4,7 +4,8 @@
 
 As the traditional baseline, we have decided to use BM25, as proposed by \citet{weak-baselines}.
 We use the Pyserini\footnote{\url{https://github.com/castorini/pyserini/}} python toolkit for information retrieval \citep{pyserini} -- a python interface for the Anserini\footnote{\url{https://github.com/castorini/Anserini}} library \citep{anserini1, anserini2}, originally implemented in Java, building on the Lucene\footnote{\url{https://lucene.apache.org/}} library.
-The Pyserini library is a highly optimized library implementing multiple search algorithms.
+The Pyserini library is a highly optimized library implementing multiple search algorithms. In Pyserini, BM25's implemention uses bigrams features. 
+
 We also compare our results with the results achieved by \citet{rypar}, who researched document retrieval for documents up to one paragraph long ($\approx$ 230 tokens), using mBERT and ColBERT \citep{colbert} models.
 
 \section{Neural Models}
@@ -56,5 +57,5 @@ The specific formulas are:
 \end{equation}
 where $Q$ is a sequence of queries and $\text{rank}_i$ is the rank of the first relevant document retrieved for the query $q_i$.
 
-The most relevant metrics for us will be recall and MRR, since we aim to provide all the necessary knowledge, ideally among the first results.
-Since precision and recall depend on the number $k$ of retrieved documents, we evaluate the models with varying $k$ and denote each evaluation with the suffix $\text{@}k$.
+The most relevant metrics for us will be the recall and the MRR since we aim to provide all the necessary knowledge ideally among the first results.
+Since the precision and the recall depend on the number $k$ of retrieved documents, we evaluate the models with varying $k$ and denote each evaluation with the suffix $\text{@}k$.

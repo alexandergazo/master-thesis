@@ -59,7 +59,7 @@ We note that the difference between the selected values and neighboring values w
             \CTK{} & [0.9, 1.1] & [0.4, 0.5] \\
             FEVER CS & [1.3, 1.5] & [0.3, 0.4]
         \end{tabular}
-        \caption[BM25 Promising Parameter Sets]{Neighbourhoods of parameter values with the best performance.}
+        \caption[BM25 Promising Parameter Sets]{Neighborhoods of parameter values with the best performance.}
         \label{tab:bm25_sets}
     \end{minipage}
 \end{table}
@@ -67,7 +67,7 @@ We note that the difference between the selected values and neighboring values w
 \section{ColBERT and mBERT baselines}
 
 We used the ColBERT and mBERT models pre-trained and fine-tuned by \citet{rypar}.
-\citet{rypar} performed document retrieval on a paragraph level, and therefore to better compare the models quality in the context of this thesis, we modify the predicted sequences by substituting paragraphs with the document they originate from.
+\citet{rypar} performed document retrieval on a paragraph level, and therefore to better compare the model's quality in the context of this thesis, we modify the predicted sequences by substituting paragraphs with the document they originate from.
 The created duplicates in the predictions are omitted in a forward pass, starting from the top and deleting each article we have already encountered.
 The change in the resulting metric, however, turned out to be marginal.
 
@@ -81,9 +81,9 @@ The model was not trained from scratch; instead, we used the pre-trained RobeCze
 However, we had to address an issue regarding RobeCzech's tokenizer, where the size of the word in its vocabulary was greater than the number of possible tokens. 
 This initialization proved to increase the speed of training.
 The issue occurred as the vocabulary mapped multiple tokens to \texttt{[UNK]}, a token representing unknown values.
-Using a simple wrapper, which returned the correct vocabulary size, around the tokenizer resolved the issue.
+Using a simple wrapper around the tokenizer, which returned the correct vocabulary size, solved the issue.
 
-The training itself was performed for 3000 steps on four Tesla V100-SXM2-32GB graphics cards, batch size 8, embedding dimension 768, landmark count 512, and a decaying learning rate 8e-5. Figure \ref{fig:nystr_training} shows that for \nystr{}, the training does not significantly slow down after increasing the input length.
+The training itself was performed for 3000 steps on four Tesla V100-SXM2-32GB graphics cards, with batch size 8, embedding dimension 768, landmark count 512, and a decaying learning rate 8e-5. Figure \ref{fig:nystr_training} shows that for \nystr{}, the training does not significantly slow down after increasing the input length.
 
 \begin{figure}[!htb]
     \centering
@@ -107,7 +107,7 @@ We applied multilingual knowledge distillation as described in Section \ref{subs
 Both the teacher and the student model were initialized as the pre-trained BigBird model.
 The training was performed using sentence-parallel Czech-English corpus Czeng 2.0 \citep{czeng2.0}. 
 The corpus contains human-translated sentences in both the Czech and the English languages. 
-After training for 25 mini-epochs on a single V100 GPU, with a learning rate of 2e-5, and a beth size of 16, the evaluation error stopped decreasing.
+After training for 25 mini-epochs on a single V100 GPU, with a learning rate of 2e-5, and a batch size of 16, the evaluation error stopped decreasing.
 
 The second stage was the training of representation generation, described in Section \ref{subsub:genrep}, again using SBERT.
 The model was tasked with generating similar or dissimilar representations of sentences in the Stanford Natural Language Inference (SNLI) Corpus \citep{snli}, depending on the label.
@@ -297,10 +297,9 @@ RobeCzech 80ep (SNLI) &   5.85 &   6.93 &   5.27 &   3.94 &   2.65 &    0.24 \\
                 BigBird (SNLI) &   1.29 &   1.45 &   1.77 &    1.78 &    1.93 &     2.01 \\
         \bottomrule
         \end{tabular}
-    \caption[\CTK{} Metrics]{\CTK{} Metrics}
+    \caption[\CTK{} Metrics]{Models' performace on the \CTK{} dataset.}
+    \label{tab:ctk_results}
 \end{table}
-
-
 \begin{table}[!htb]
     \centering
     \begin{tabular}{lrrrrrr}
@@ -354,12 +353,30 @@ RobeCzech 80ep (SNLI) &   5.85 &   6.93 &   5.27 &   3.94 &   2.65 &    0.24 \\
 \nystr{} 2048 3k Steps &   0.18 &   0.20 &   0.25 &    0.26 &    0.29 &     0.34 \\
         \bottomrule
         \end{tabular}
-    \caption[FEVER CS Metrics]{FEVER CS Metrics}
+    \caption[FEVER CS Metrics]{Models' performance on the FEVER CS dataset.}
+    \label{tab:fever_results}
 \end{table}
-
-\subsection{\CTK}
-\subsection{FEVER CS}
 
 \section{Discussion}
 
-Due to non-compatible codebases of different implementations, resource-intesivity of the task, which also 
+The selected methods were unsuccessful in surpassing the baselines.
+The best performance out of the proposed methods has been achieved by the RobeCzech model, which underwent 50 episodes of representation generation fine-tuning using the machine-translated SNLI dataset.
+The extended training presumably caused a forgetting of important pre-trained patterns, and therefore, the 80 episode model performed slightly worse.
+
+We observe the potential of ``entailment training'' using the translated SNLI dataset. 
+The base version of RobeCzech also significantly improved its performance after a few epochs of the SNLI training.
+Even the originally English model BigBird was able to outperform the Czech monolingual model \nystr{} and provide at least some relevant documents.
+
+The \nystr{} model failed, despite producing a high accuracy on the MLM pre-training task. 
+All of this leads us to agree with the results of \citet{sbert}, who state that the crucial part of generating representation is to fine-tune the model to do so on SNLI-like datasets.
+
+Differences between datasets are also visible.
+On the FEVER CS dataset, the paragraph-level-trained neural approaches outperformed every other model, as well as the traditional baseline BM25. 
+The best version of RobeCzech was able to perform on-par with BM25, while the other tested approaches, namely BigBird and \nystr{}, failed.
+
+On the other hand, the \CTK{} dataset posed a significant challenge to the neural models.
+The traditional baseline BM25 performs on the same level as the best-performing neural model ColBERT.
+
+These observations suggest that neural models struggle with comprehending \CTK{} news articles, apart from effectively emulating simple word-count-based representations (like TFIDF).
+The semi-structured style of Wikipedia articles, and the consistent explanatory nature of the articles, possibly allows the neural models to ``focus'' on the word meaning without being ``distracted'' by the changing style.
+News articles contain considerably more noise, and the sentiment of different articles also varies.
